@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Main activity showing the song library.
@@ -41,6 +43,7 @@ public class MainActivity extends Activity {
     private EditText searchField;
     private List<File> allSongFiles = new ArrayList<File>();
     private List<File> filteredSongFiles = new ArrayList<File>();
+    private Map<File, String> songTitles = new HashMap<File, String>();
     private ArrayAdapter<String> adapter;
 
     @Override
@@ -146,6 +149,7 @@ public class MainActivity extends Activity {
 
     private void loadSongs() {
         allSongFiles.clear();
+        songTitles.clear();
 
         // Look for songs in FreeSong folder on external storage
         File freeSongDir = new File(Environment.getExternalStorageDirectory(), "FreeSong");
@@ -176,21 +180,45 @@ public class MainActivity extends Activity {
             if (dir.exists() && dir.isDirectory()) {
                 File[] files = dir.listFiles(songFilter);
                 if (files != null) {
-                    allSongFiles.addAll(Arrays.asList(files));
+                    for (File file : files) {
+                        allSongFiles.add(file);
+                        songTitles.put(file, getSongTitle(file));
+                    }
                 }
             }
         }
 
-        // Sort by filename
+        // Sort by song title
         Collections.sort(allSongFiles, new Comparator<File>() {
             @Override
             public int compare(File f1, File f2) {
-                return f1.getName().compareToIgnoreCase(f2.getName());
+                String t1 = songTitles.get(f1);
+                String t2 = songTitles.get(f2);
+                return t1.compareToIgnoreCase(t2);
             }
         });
 
         // Apply current filter
         filterSongs(searchField.getText().toString());
+    }
+
+    private String getSongTitle(File file) {
+        try {
+            Song song = SongParser.parseFile(file);
+            String title = song.getTitle();
+            if (title != null && !title.isEmpty()) {
+                return title;
+            }
+        } catch (Exception e) {
+            // Fall back to filename
+        }
+        // Use filename without extension as fallback
+        String name = file.getName();
+        int dotIndex = name.lastIndexOf('.');
+        if (dotIndex > 0) {
+            name = name.substring(0, dotIndex);
+        }
+        return name;
     }
 
     private void filterSongs(String query) {
@@ -200,15 +228,14 @@ public class MainActivity extends Activity {
         String lowerQuery = query.toLowerCase().trim();
 
         for (File file : allSongFiles) {
-            String name = file.getName();
-            int dotIndex = name.lastIndexOf('.');
-            if (dotIndex > 0) {
-                name = name.substring(0, dotIndex);
+            String title = songTitles.get(file);
+            if (title == null) {
+                title = file.getName();
             }
 
-            if (lowerQuery.isEmpty() || name.toLowerCase().contains(lowerQuery)) {
+            if (lowerQuery.isEmpty() || title.toLowerCase().contains(lowerQuery)) {
                 filteredSongFiles.add(file);
-                adapter.add(name);
+                adapter.add(title);
             }
         }
 

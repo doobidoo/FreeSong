@@ -5,21 +5,62 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="FreeSong"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="FreeSong"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/importBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Import"
+            android:layout_marginRight="4dp" />
+
+        <Button
+            android:id="@+id/themeBtn"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:text="@string/theme_icon"
+            android:layout_marginRight="4dp" />
+
+        <Button
+            android:id="@+id/setlistsBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sets" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/searchField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search songs..."
+        android:inputType="text"
+        android:drawableLeft="@android:drawable/ic_menu_search"
+        android:drawablePadding="8dp"
+        android:padding="12dp"
+        android:background="@android:drawable/editbox_background"
         android:layout_marginBottom="8dp" />
 
     <TextView
+        android:id="@+id/songCountText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Your Song Library"
         android:textSize="14sp"
         android:textColor="#666666"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="8dp" />
 
     <ListView
         android:id="@+id/songListView"
