@@ -9,34 +9,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="16dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="FreeSong"
+            android:text="Setlists"
             android:textSize="24sp"
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/setlistsBtn"
+            android:id="@+id/newSetlistBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Setlists" />
+            android:text="+ New" />
 
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Your Song Library"
-        android:textSize="14sp"
-        android:textColor="#666666"
-        android:layout_marginBottom="16dp" />
-
     <ListView
-        android:id="@+id/songListView"
+        android:id="@+id/setlistListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -49,7 +41,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="@string/no_songs"
+        android:text="No setlists yet.\nTap '+ New' to create one."
         android:textSize="16sp"
         android:textColor="#999999"
         android:visibility="gone"

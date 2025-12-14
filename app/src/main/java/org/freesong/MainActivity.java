@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.File;
@@ -28,6 +29,7 @@ public class MainActivity extends Activity {
 
     private ListView songListView;
     private TextView emptyText;
+    private Button setlistsBtn;
     private List<File> songFiles = new ArrayList<File>();
     private ArrayAdapter<String> adapter;
 
@@ -38,8 +40,21 @@ public class MainActivity extends Activity {
 
         songListView = (ListView) findViewById(R.id.songListView);
         emptyText = (TextView) findViewById(R.id.emptyText);
+        setlistsBtn = (Button) findViewById(R.id.setlistsBtn);
+
+        setlistsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSetLists();
+            }
+        });
 
         setupSongList();
+    }
+
+    private void openSetLists() {
+        Intent intent = new Intent(this, SetListsActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -141,9 +156,9 @@ public class MainActivity extends Activity {
         startActivity(intent);
     }
 
-    private void showSongInfo(File file) {
+    private void showSongInfo(final File file) {
         try {
-            Song song = SongParser.parseFile(file);
+            final Song song = SongParser.parseFile(file);
             StringBuilder info = new StringBuilder();
             info.append("Title: ").append(song.getTitle()).append("\n");
             info.append("Artist: ").append(song.getArtist()).append("\n");
@@ -164,10 +179,61 @@ public class MainActivity extends Activity {
                         openSong(file);
                     }
                 })
+                .setNeutralButton("Add to Setlist", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showAddToSetlistDialog(file, song);
+                    }
+                })
                 .setNegativeButton("Cancel", null)
                 .show();
         } catch (Exception e) {
             Toast.makeText(this, "Error reading song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void showAddToSetlistDialog(final File file, final Song song) {
+        final SetListDbHelper dbHelper = SetListDbHelper.getInstance(this);
+        final List<SetList> setLists = dbHelper.getAllSetLists();
+
+        if (setLists.isEmpty()) {
+            new AlertDialog.Builder(this)
+                .setTitle("No Setlists")
+                .setMessage("Create a setlist first.")
+                .setPositiveButton("Create Setlist", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        openSetLists();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+            return;
+        }
+
+        String[] setlistNames = new String[setLists.size()];
+        for (int i = 0; i < setLists.size(); i++) {
+            setlistNames[i] = setLists.get(i).getName();
+        }
+
+        new AlertDialog.Builder(this)
+            .setTitle("Add to Setlist")
+            .setItems(setlistNames, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    SetList selectedSetList = setLists.get(which);
+                    SetList.SetListItem item = new SetList.SetListItem(
+                        file.getAbsolutePath(),
+                        song.getTitle(),
+                        song.getArtist()
+                    );
+                    dbHelper.addItemToSetList(selectedSetList.getId(), item);
+                    Toast.makeText(MainActivity.this,
+                        "Added to \"" + selectedSetList.getName() + "\"",
+                        Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 }

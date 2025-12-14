@@ -12,28 +12,54 @@
         android:layout_marginBottom="8dp">
 
         <TextView
+            android:id="@+id/setlistNameText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="FreeSong"
             android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:text="Setlist Name" />
 
         <Button
-            android:id="@+id/setlistsBtn"
+            android:id="@+id/addSongBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Setlists" />
+            android:text="+ Add" />
 
     </LinearLayout>
 
     <TextView
+        android:id="@+id/songCountText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Your Song Library"
+        android:text="0 songs"
         android:textSize="14sp"
         android:textColor="#666666"
         android:layout_marginBottom="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/playSetlistBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Play"
+            android:layout_marginRight="4dp" />
+
+        <Button
+            android:id="@+id/editSetlistBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Edit"
+            android:layout_marginLeft="4dp" />
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/songListView"
@@ -49,7 +75,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="@string/no_songs"
+        android:text="No songs in this setlist.\nTap '+ Add' to add songs."
         android:textSize="16sp"
         android:textColor="#999999"
         android:visibility="gone"
