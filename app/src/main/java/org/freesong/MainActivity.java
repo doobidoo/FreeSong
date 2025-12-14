@@ -30,11 +30,14 @@ import java.util.List;
  */
 public class MainActivity extends Activity {
 
+    private static final int REQUEST_IMPORT = 100;
+
     private ListView songListView;
     private TextView emptyText;
     private TextView songCountText;
     private Button setlistsBtn;
     private Button themeBtn;
+    private Button importBtn;
     private EditText searchField;
     private List<File> allSongFiles = new ArrayList<File>();
     private List<File> filteredSongFiles = new ArrayList<File>();
@@ -51,6 +54,7 @@ public class MainActivity extends Activity {
         songCountText = (TextView) findViewById(R.id.songCountText);
         setlistsBtn = (Button) findViewById(R.id.setlistsBtn);
         themeBtn = (Button) findViewById(R.id.themeBtn);
+        importBtn = (Button) findViewById(R.id.importBtn);
         searchField = (EditText) findViewById(R.id.searchField);
 
         setlistsBtn.setOnClickListener(new View.OnClickListener() {
@@ -64,6 +68,13 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 toggleTheme();
+            }
+        });
+
+        importBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openImport();
             }
         });
 
@@ -91,6 +102,20 @@ public class MainActivity extends Activity {
     private void openSetLists() {
         Intent intent = new Intent(this, SetListsActivity.class);
         startActivity(intent);
+    }
+
+    private void openImport() {
+        Intent intent = new Intent(this, FileBrowserActivity.class);
+        startActivityForResult(intent, REQUEST_IMPORT);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_IMPORT && resultCode == RESULT_OK) {
+            // Reload songs after import
+            loadSongs();
+        }
     }
 
     @Override

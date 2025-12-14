@@ -44,6 +44,10 @@
             android:name=".SongPickerActivity"
             android:label="Add Songs" />
 
+        <activity
+            android:name=".FileBrowserActivity"
+            android:label="Import" />
+
     </application>
 
 </manifest>

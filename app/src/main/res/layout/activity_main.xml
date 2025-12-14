@@ -20,17 +20,24 @@
             android:textStyle="bold" />
 
         <Button
+            android:id="@+id/importBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Import"
+            android:layout_marginRight="4dp" />
+
+        <Button
             android:id="@+id/themeBtn"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:text="@string/theme_icon"
-            android:layout_marginRight="8dp" />
+            android:layout_marginRight="4dp" />
 
         <Button
             android:id="@+id/setlistsBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Setlists" />
+            android:text="Sets" />
 
     </LinearLayout>
 
