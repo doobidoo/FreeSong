@@ -27,13 +27,26 @@
 
     </LinearLayout>
 
+    <EditText
+        android:id="@+id/searchField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search songs..."
+        android:inputType="text"
+        android:drawableLeft="@android:drawable/ic_menu_search"
+        android:drawablePadding="8dp"
+        android:padding="12dp"
+        android:background="@android:drawable/editbox_background"
+        android:layout_marginBottom="8dp" />
+
     <TextView
+        android:id="@+id/songCountText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Your Song Library"
         android:textSize="14sp"
         android:textColor="#666666"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="8dp" />
 
     <ListView
         android:id="@+id/songListView"

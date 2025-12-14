@@ -12,7 +12,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
+import android.text.Editable;
+import android.text.TextWatcher;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -29,8 +32,11 @@ public class MainActivity extends Activity {
 
     private ListView songListView;
     private TextView emptyText;
+    private TextView songCountText;
     private Button setlistsBtn;
-    private List<File> songFiles = new ArrayList<File>();
+    private EditText searchField;
+    private List<File> allSongFiles = new ArrayList<File>();
+    private List<File> filteredSongFiles = new ArrayList<File>();
     private ArrayAdapter<String> adapter;
 
     @Override
@@ -40,12 +46,27 @@ public class MainActivity extends Activity {
 
         songListView = (ListView) findViewById(R.id.songListView);
         emptyText = (TextView) findViewById(R.id.emptyText);
+        songCountText = (TextView) findViewById(R.id.songCountText);
         setlistsBtn = (Button) findViewById(R.id.setlistsBtn);
+        searchField = (EditText) findViewById(R.id.searchField);
 
         setlistsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openSetLists();
+            }
+        });
+
+        searchField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                filterSongs(s.toString());
             }
         });
 
@@ -70,22 +91,21 @@ public class MainActivity extends Activity {
         songListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                openSong(songFiles.get(position));
+                openSong(filteredSongFiles.get(position));
             }
         });
 
         songListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                showSongInfo(songFiles.get(position));
+                showSongInfo(filteredSongFiles.get(position));
                 return true;
             }
         });
     }
 
     private void loadSongs() {
-        songFiles.clear();
-        adapter.clear();
+        allSongFiles.clear();
 
         // Look for songs in FreeSong folder on external storage
         File freeSongDir = new File(Environment.getExternalStorageDirectory(), "FreeSong");
@@ -116,34 +136,64 @@ public class MainActivity extends Activity {
             if (dir.exists() && dir.isDirectory()) {
                 File[] files = dir.listFiles(songFilter);
                 if (files != null) {
-                    songFiles.addAll(Arrays.asList(files));
+                    allSongFiles.addAll(Arrays.asList(files));
                 }
             }
         }
 
         // Sort by filename
-        Collections.sort(songFiles, new Comparator<File>() {
+        Collections.sort(allSongFiles, new Comparator<File>() {
             @Override
             public int compare(File f1, File f2) {
                 return f1.getName().compareToIgnoreCase(f2.getName());
             }
         });
 
-        // Update adapter
-        for (File file : songFiles) {
+        // Apply current filter
+        filterSongs(searchField.getText().toString());
+    }
+
+    private void filterSongs(String query) {
+        filteredSongFiles.clear();
+        adapter.clear();
+
+        String lowerQuery = query.toLowerCase().trim();
+
+        for (File file : allSongFiles) {
             String name = file.getName();
-            // Remove extension for display
             int dotIndex = name.lastIndexOf('.');
             if (dotIndex > 0) {
                 name = name.substring(0, dotIndex);
             }
-            adapter.add(name);
+
+            if (lowerQuery.isEmpty() || name.toLowerCase().contains(lowerQuery)) {
+                filteredSongFiles.add(file);
+                adapter.add(name);
+            }
+        }
+
+        updateSongCount();
+    }
+
+    private void updateSongCount() {
+        int filtered = filteredSongFiles.size();
+        int total = allSongFiles.size();
+
+        if (filtered == total) {
+            songCountText.setText(total + " song" + (total != 1 ? "s" : ""));
+        } else {
+            songCountText.setText(filtered + " of " + total + " songs");
         }
 
         // Show/hide empty message
-        if (songFiles.isEmpty()) {
+        if (filteredSongFiles.isEmpty()) {
             emptyText.setVisibility(View.VISIBLE);
             songListView.setVisibility(View.GONE);
+            if (allSongFiles.isEmpty()) {
+                emptyText.setText(R.string.no_songs);
+            } else {
+                emptyText.setText("No songs match your search");
+            }
         } else {
             emptyText.setVisibility(View.GONE);
             songListView.setVisibility(View.VISIBLE);
