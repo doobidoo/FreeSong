@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "org.freesong.app-mergeDebugResources-2:/values/values.xml",
+            "map": [
+                {
+                    "source": "/home/hkr/repositories/FreeSong/app/src/main/res/values/strings.xml",
+                    "from": {
+                        "startLines": "8,6,7,2,9,3,5,4",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "410,302,355,55,468,101,256,212",
+                        "endColumns": "57,52,54,45,47,110,45,43",
+                        "endOffsets": "463,350,405,96,511,207,297,251"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,113,166,221,267,315,426,472",
+                        "endColumns": "57,52,54,45,47,110,45,43",
+                        "endOffsets": "108,161,216,262,310,421,467,511"
+                    }
+                }
+            ]
+        }
+    ]
+}

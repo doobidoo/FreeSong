@@ -1,0 +1,26 @@
+R_DEF: Internal format may change without notice
+local
+drawable ic_launcher
+id artistText
+id autoScrollBtn
+id emptyText
+id fontDownBtn
+id fontUpBtn
+id keyText
+id scrollView
+id songContent
+id songListView
+id speedSeekBar
+id titleText
+id transposeDownBtn
+id transposeUpBtn
+layout activity_main
+layout activity_song_view
+string action_autoscroll
+string action_settings
+string action_transpose
+string app_name
+string font_size
+string no_songs
+string transpose_down
+string transpose_up

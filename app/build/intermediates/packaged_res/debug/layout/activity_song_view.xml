@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="#F5F5F5">
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#333333" />
+
+        <TextView
+            android:id="@+id/artistText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#666666" />
+
+        <TextView
+            android:id="@+id/keyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#0066CC"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Control Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#EEEEEE"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/transposeDownBtn"
+            android:layout_width="48dp"
+            android:layout_height="40dp"
+            android:text="-"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Key"
+            android:textSize="12sp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp" />
+
+        <Button
+            android:id="@+id/transposeUpBtn"
+            android:layout_width="48dp"
+            android:layout_height="40dp"
+            android:text="+"
+            android:textSize="18sp" />
+
+        <View
+            android:layout_width="16dp"
+            android:layout_height="1dp" />
+
+        <Button
+            android:id="@+id/fontDownBtn"
+            android:layout_width="48dp"
+            android:layout_height="40dp"
+            android:text="A-"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/fontUpBtn"
+            android:layout_width="48dp"
+            android:layout_height="40dp"
+            android:text="A+"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/autoScrollBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Scroll"
+            android:textSize="14sp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp" />
+
+    </LinearLayout>
+
+    <!-- Speed Control (hidden by default, shown when scrolling) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#E0E0E0"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Speed:"
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/speedSeekBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:max="100"
+            android:progress="20" />
+
+    </LinearLayout>
+
+    <!-- Song Content -->
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/songContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:lineSpacingMultiplier="1.2"
+            android:fontFamily="monospace" />
+
+    </ScrollView>
+
+</LinearLayout>
