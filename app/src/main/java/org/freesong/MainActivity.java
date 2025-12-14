@@ -34,6 +34,7 @@ public class MainActivity extends Activity {
     private TextView emptyText;
     private TextView songCountText;
     private Button setlistsBtn;
+    private Button themeBtn;
     private EditText searchField;
     private List<File> allSongFiles = new ArrayList<File>();
     private List<File> filteredSongFiles = new ArrayList<File>();
@@ -42,18 +43,27 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeManager.applyTheme(this);
         setContentView(R.layout.activity_main);
 
         songListView = (ListView) findViewById(R.id.songListView);
         emptyText = (TextView) findViewById(R.id.emptyText);
         songCountText = (TextView) findViewById(R.id.songCountText);
         setlistsBtn = (Button) findViewById(R.id.setlistsBtn);
+        themeBtn = (Button) findViewById(R.id.themeBtn);
         searchField = (EditText) findViewById(R.id.searchField);
 
         setlistsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openSetLists();
+            }
+        });
+
+        themeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleTheme();
             }
         });
 
@@ -71,6 +81,11 @@ public class MainActivity extends Activity {
         });
 
         setupSongList();
+    }
+
+    private void toggleTheme() {
+        ThemeManager.toggleDarkMode(this);
+        recreate();
     }
 
     private void openSetLists() {

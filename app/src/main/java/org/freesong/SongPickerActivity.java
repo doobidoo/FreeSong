@@ -40,6 +40,7 @@ public class SongPickerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeManager.applyTheme(this);
         setContentView(R.layout.activity_song_picker);
 
         setListId = getIntent().getLongExtra("setListId", -1);

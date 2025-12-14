@@ -46,16 +46,26 @@ public class SongViewActivity extends Activity {
     private Handler scrollHandler = new Handler();
     private GestureDetector gestureDetector;
 
-    private static final int CHORD_COLOR = 0xFF0066CC;  // Blue
-    private static final int SECTION_COLOR = 0xFF666666; // Gray
+    private int chordColor;
+    private int sectionColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeManager.applyFullscreenTheme(this);
         setContentView(R.layout.activity_song_view);
 
         // Keep screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // Set theme-aware colors
+        if (ThemeManager.isDarkMode(this)) {
+            chordColor = getResources().getColor(R.color.chord_color_dark);
+            sectionColor = getResources().getColor(R.color.section_color_dark);
+        } else {
+            chordColor = getResources().getColor(R.color.chord_color_light);
+            sectionColor = getResources().getColor(R.color.section_color_light);
+        }
 
         initViews();
         loadSong();
@@ -155,7 +165,7 @@ public class SongViewActivity extends Activity {
             if (!section.getLabel().isEmpty()) {
                 int start = content.length();
                 content.append("[").append(section.getLabel()).append("]\n");
-                content.setSpan(new ForegroundColorSpan(SECTION_COLOR), start, content.length(),
+                content.setSpan(new ForegroundColorSpan(sectionColor), start, content.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 content.setSpan(new StyleSpan(Typeface.BOLD), start, content.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -176,7 +186,7 @@ public class SongViewActivity extends Activity {
                     if (chordLine.length() > 0) {
                         int start = content.length();
                         content.append(chordLine.toString()).append("\n");
-                        content.setSpan(new ForegroundColorSpan(CHORD_COLOR), start, content.length(),
+                        content.setSpan(new ForegroundColorSpan(chordColor), start, content.length(),
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         content.setSpan(new StyleSpan(Typeface.BOLD), start, content.length(),
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

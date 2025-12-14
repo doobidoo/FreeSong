@@ -43,6 +43,7 @@ public class SetListViewActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeManager.applyTheme(this);
         setContentView(R.layout.activity_setlist_view);
 
         dbHelper = SetListDbHelper.getInstance(this);
