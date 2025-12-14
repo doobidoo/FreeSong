@@ -17,8 +17,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,6 +34,7 @@ public class SongPickerActivity extends Activity {
     private Button addBtn;
 
     private List<File> songFiles = new ArrayList<File>();
+    private Map<File, String> songTitles = new HashMap<File, String>();
     private Set<Integer> selectedPositions = new HashSet<Integer>();
     private ArrayAdapter<String> adapter;
     private long setListId;
@@ -80,6 +83,7 @@ public class SongPickerActivity extends Activity {
 
     private void loadSongs() {
         songFiles.clear();
+        songTitles.clear();
 
         // Get existing song paths in setlist to exclude duplicates
         List<SetList.SetListItem> existingItems = dbHelper.getSetListItems(setListId);
@@ -114,30 +118,47 @@ public class SongPickerActivity extends Activity {
                     for (File file : files) {
                         if (!existingPaths.contains(file.getAbsolutePath())) {
                             songFiles.add(file);
+                            songTitles.put(file, getSongTitle(file));
                         }
                     }
                 }
             }
         }
 
-        // Sort by filename
+        // Sort by song title
         Collections.sort(songFiles, new Comparator<File>() {
             @Override
             public int compare(File f1, File f2) {
-                return f1.getName().compareToIgnoreCase(f2.getName());
+                String t1 = songTitles.get(f1);
+                String t2 = songTitles.get(f2);
+                return t1.compareToIgnoreCase(t2);
             }
         });
+    }
+
+    private String getSongTitle(File file) {
+        try {
+            Song song = SongParser.parseFile(file);
+            String title = song.getTitle();
+            if (title != null && !title.isEmpty()) {
+                return title;
+            }
+        } catch (Exception e) {
+            // Fall back to filename
+        }
+        // Use filename without extension as fallback
+        String name = file.getName();
+        int dotIndex = name.lastIndexOf('.');
+        if (dotIndex > 0) {
+            name = name.substring(0, dotIndex);
+        }
+        return name;
     }
 
     private void setupListView() {
         List<String> songNames = new ArrayList<String>();
         for (File file : songFiles) {
-            String name = file.getName();
-            int dotIndex = name.lastIndexOf('.');
-            if (dotIndex > 0) {
-                name = name.substring(0, dotIndex);
-            }
-            songNames.add(name);
+            songNames.add(songTitles.get(file));
         }
 
         adapter = new ArrayAdapter<String>(this,
