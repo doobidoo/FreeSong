@@ -4,11 +4,16 @@ import android.os.Environment;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -136,7 +141,48 @@ public class BackupImporter {
                lowerName.endsWith(".txt");
     }
 
+    // Mac Roman charset for OnSong files
+    private static final Charset MAC_ROMAN = Charset.forName("x-MacRoman");
+    private static final Charset UTF8 = Charset.forName("UTF-8");
+
     private static void extractFile(ZipInputStream zis, File destFile) throws IOException {
+        // For text files, convert from Mac Roman to UTF-8
+        String name = destFile.getName().toLowerCase();
+        if (name.endsWith(".txt") || name.endsWith(".onsong") ||
+            name.endsWith(".chordpro") || name.endsWith(".cho") ||
+            name.endsWith(".crd") || name.endsWith(".pro")) {
+            extractTextFile(zis, destFile);
+        } else {
+            extractBinaryFile(zis, destFile);
+        }
+    }
+
+    private static void extractTextFile(ZipInputStream zis, File destFile) throws IOException {
+        BufferedReader reader = null;
+        BufferedWriter writer = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(zis, MAC_ROMAN));
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile), UTF8));
+
+            String line;
+            boolean first = true;
+            while ((line = reader.readLine()) != null) {
+                if (!first) {
+                    writer.newLine();
+                }
+                writer.write(line);
+                first = false;
+            }
+            writer.flush();
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+            // Don't close reader as it wraps the ZipInputStream
+        }
+    }
+
+    private static void extractBinaryFile(ZipInputStream zis, File destFile) throws IOException {
         BufferedOutputStream bos = null;
         try {
             bos = new BufferedOutputStream(new FileOutputStream(destFile), BUFFER_SIZE);

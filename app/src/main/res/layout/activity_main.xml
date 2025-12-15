@@ -30,7 +30,6 @@
             android:id="@+id/themeBtn"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:text="@string/theme_icon"
             android:layout_marginRight="4dp" />
 
         <Button

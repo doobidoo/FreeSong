@@ -95,6 +95,16 @@ public class MainActivity extends Activity {
         });
 
         setupSongList();
+        updateThemeButton();
+    }
+
+    private void updateThemeButton() {
+        // Show sun in dark mode (to switch to light), moon in light mode (to switch to dark)
+        if (ThemeManager.isDarkMode(this)) {
+            themeBtn.setText(R.string.theme_icon_sun);
+        } else {
+            themeBtn.setText(R.string.theme_icon_moon);
+        }
     }
 
     private void toggleTheme() {

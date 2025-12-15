@@ -8,7 +8,8 @@
     <string name="action_transpose">Transpose</string>
     <string name="action_autoscroll">Auto-Scroll</string>
     <string name="font_size">Font Size</string>
-    <string name="theme_icon">&#x263C;</string>
+    <string name="theme_icon_sun">&#x2600;</string>
+    <string name="theme_icon_moon">&#x263D;</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
 </resources>

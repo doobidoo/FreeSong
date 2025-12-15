@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -47,6 +48,10 @@
         <activity
             android:name=".FileBrowserActivity"
             android:label="Import" />
+
+        <activity
+            android:name=".SongEditActivity"
+            android:label="Edit Song" />
 
     </application>
 

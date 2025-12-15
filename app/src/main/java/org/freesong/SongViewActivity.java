@@ -1,6 +1,7 @@
 package org.freesong;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,17 +20,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Activity for viewing and interacting with a song.
  */
 public class SongViewActivity extends Activity {
 
+    private static final int REQUEST_EDIT = 200;
+
     private Song song;
+    private String songPath;
     private int transposition = 0;
     private boolean autoScrolling = false;
     private int scrollSpeed = 50; // pixels per second
     private float fontSize = 18f;
+
+    // Setlist navigation support
+    private ArrayList<String> setlistPaths;
+    private int currentIndex = -1;
 
     private TextView titleText;
     private TextView artistText;
@@ -39,6 +48,7 @@ public class SongViewActivity extends Activity {
     private Button transposeUpBtn;
     private Button transposeDownBtn;
     private Button autoScrollBtn;
+    private Button editBtn;
     private Button fontUpBtn;
     private Button fontDownBtn;
     private SeekBar speedSeekBar;
@@ -81,6 +91,7 @@ public class SongViewActivity extends Activity {
         transposeUpBtn = (Button) findViewById(R.id.transposeUpBtn);
         transposeDownBtn = (Button) findViewById(R.id.transposeDownBtn);
         autoScrollBtn = (Button) findViewById(R.id.autoScrollBtn);
+        editBtn = (Button) findViewById(R.id.editBtn);
         fontUpBtn = (Button) findViewById(R.id.fontUpBtn);
         fontDownBtn = (Button) findViewById(R.id.fontDownBtn);
         speedSeekBar = (SeekBar) findViewById(R.id.speedSeekBar);
@@ -103,6 +114,13 @@ public class SongViewActivity extends Activity {
             @Override
             public void onClick(View v) {
                 toggleAutoScroll();
+            }
+        });
+
+        editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openEditor();
             }
         });
 
@@ -136,13 +154,33 @@ public class SongViewActivity extends Activity {
         speedSeekBar.setProgress(20); // Default medium speed
     }
 
+    private void openEditor() {
+        Intent intent = new Intent(this, SongEditActivity.class);
+        intent.putExtra("songPath", songPath);
+        startActivityForResult(intent, REQUEST_EDIT);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_EDIT && resultCode == RESULT_OK) {
+            // Reload the song after editing
+            transposition = 0;
+            loadSong();
+        }
+    }
+
     private void loadSong() {
-        String songPath = getIntent().getStringExtra("songPath");
+        songPath = getIntent().getStringExtra("songPath");
         if (songPath == null) {
             Toast.makeText(this, "No song path provided", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
+
+        // Get setlist navigation info if available
+        setlistPaths = getIntent().getStringArrayListExtra("setlistPaths");
+        currentIndex = getIntent().getIntExtra("currentIndex", -1);
 
         try {
             song = SongParser.parseFile(new File(songPath));
@@ -150,6 +188,36 @@ public class SongViewActivity extends Activity {
         } catch (Exception e) {
             Toast.makeText(this, "Error loading song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
+        }
+    }
+
+    private void loadSongAtIndex(int index) {
+        if (setlistPaths == null || index < 0 || index >= setlistPaths.size()) {
+            return;
+        }
+
+        currentIndex = index;
+        songPath = setlistPaths.get(index);
+        transposition = 0;
+
+        try {
+            song = SongParser.parseFile(new File(songPath));
+            displaySong();
+            scrollView.scrollTo(0, 0);
+        } catch (Exception e) {
+            Toast.makeText(this, "Error loading song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void navigatePrevious() {
+        if (setlistPaths != null && currentIndex > 0) {
+            loadSongAtIndex(currentIndex - 1);
+        }
+    }
+
+    private void navigateNext() {
+        if (setlistPaths != null && currentIndex < setlistPaths.size() - 1) {
+            loadSongAtIndex(currentIndex + 1);
         }
     }
 
@@ -262,10 +330,61 @@ public class SongViewActivity extends Activity {
 
     private void setupGestures() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            private static final int SWIPE_THRESHOLD = 100;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+
             @Override
             public boolean onDoubleTap(MotionEvent e) {
                 toggleAutoScroll();
                 return true;
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                // Only handle horizontal swipes for navigation when in setlist mode
+                if (setlistPaths == null || e1 == null || e2 == null) {
+                    return false;
+                }
+
+                float diffX = e2.getX() - e1.getX();
+                float diffY = e2.getY() - e1.getY();
+
+                // Check if horizontal swipe (more horizontal than vertical)
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffX > 0) {
+                            // Swipe right = previous song
+                            navigatePrevious();
+                        } else {
+                            // Swipe left = next song
+                            navigateNext();
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                // Tap on left/right edge for navigation in setlist mode
+                if (setlistPaths == null) {
+                    return false;
+                }
+
+                int screenWidth = scrollView.getWidth();
+                float x = e.getX();
+
+                if (x < screenWidth * 0.15) {
+                    // Tap on left 15% = previous
+                    navigatePrevious();
+                    return true;
+                } else if (x > screenWidth * 0.85) {
+                    // Tap on right 15% = next
+                    navigateNext();
+                    return true;
+                }
+                return false;
             }
         });
 

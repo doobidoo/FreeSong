@@ -169,9 +169,15 @@ public class SetListViewActivity extends Activity {
             return;
         }
 
+        // Build list of song paths for swipe navigation
+        ArrayList<String> songPaths = new ArrayList<String>();
+        for (SetList.SetListItem i : items) {
+            songPaths.add(i.getSongPath());
+        }
+
         Intent intent = new Intent(this, SongViewActivity.class);
         intent.putExtra("songPath", item.getSongPath());
-        intent.putExtra("setListId", setList.getId());
+        intent.putStringArrayListExtra("setlistPaths", songPaths);
         intent.putExtra("currentIndex", position);
         startActivity(intent);
     }
