@@ -36,7 +36,7 @@ public class SongViewActivity extends Activity {
     private boolean autoScrolling = false;
     private int scrollSpeed = 50; // pixels per second
     private float fontSize = 18f;
-    private boolean scrollBarVisible = true;
+    private boolean speedBarVisible = true;
 
     // Setlist navigation support
     private ArrayList<String> setlistPaths;
@@ -167,7 +167,7 @@ public class SongViewActivity extends Activity {
         scrollBarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toggleScrollBar();
+                toggleSpeedBar();
             }
         });
 
@@ -212,12 +212,14 @@ public class SongViewActivity extends Activity {
         keyText.setTextColor(keyColor);
     }
 
-    private void toggleScrollBar() {
-        scrollBarVisible = !scrollBarVisible;
-        if (scrollBarVisible) {
-            scrollView.setVerticalScrollBarEnabled(true);
+    private void toggleSpeedBar() {
+        speedBarVisible = !speedBarVisible;
+        if (speedBarVisible) {
+            speedBar.setVisibility(View.VISIBLE);
+            scrollBarBtn.setText("▼");
         } else {
-            scrollView.setVerticalScrollBarEnabled(false);
+            speedBar.setVisibility(View.GONE);
+            scrollBarBtn.setText("▲");
         }
     }
 

@@ -51,7 +51,7 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 - Long-press for song info and options to add to setlist
 - Use the control bar to transpose, adjust font size, or enable auto-scroll
 - Double-tap to toggle auto-scroll
-- Use the scrollbar toggle button to show/hide the scrollbar
+- Use the ▼/▲ button to show/hide the speed control bar
 
 ### Setlists
 - Tap **Sets** to manage your setlists

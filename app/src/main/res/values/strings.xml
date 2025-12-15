@@ -9,7 +9,7 @@
     <string name="action_autoscroll">Auto-Scroll</string>
     <string name="font_size">Font Size</string>
     <string name="theme_icon_sun">☀</string>
-    <string name="theme_icon_moon">☾</string>
+    <string name="theme_icon_moon">◐</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
 </resources>
