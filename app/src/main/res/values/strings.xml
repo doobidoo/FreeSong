@@ -13,7 +13,7 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="about_icon">ⓘ</string>
-    <string name="app_author">Hannes Kröger</string>
+    <string name="app_author">Heinrich Krupp</string>
     <string name="app_license">MIT License</string>
     <string name="app_description">A free, open-source alternative to OnSong for displaying song lyrics and chords. Designed for musicians who need a simple, reliable lead sheet viewer.</string>
     <string name="app_url">https://github.com/doobidoo/FreeSong</string>
