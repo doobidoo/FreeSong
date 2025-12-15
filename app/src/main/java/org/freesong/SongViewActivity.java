@@ -62,6 +62,7 @@ public class SongViewActivity extends Activity {
     private Button fontUpBtn;
     private Button fontDownBtn;
     private Button scrollBarBtn;
+    private Button themeBtn;
     private SeekBar speedSeekBar;
 
     private Handler scrollHandler = new Handler();
@@ -77,6 +78,11 @@ public class SongViewActivity extends Activity {
         super.onCreate(savedInstanceState);
         ThemeManager.applyFullscreenTheme(this);
         setContentView(R.layout.activity_song_view);
+
+        // Restore state if available
+        if (savedInstanceState != null) {
+            speedBarVisible = savedInstanceState.getBoolean("speedBarVisible", true);
+        }
 
         // Keep screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -95,8 +101,19 @@ public class SongViewActivity extends Activity {
 
         initViews();
         applyThemeColors();
+
+        // Apply restored speed bar visibility state
+        speedBar.setVisibility(speedBarVisible ? View.VISIBLE : View.GONE);
+        scrollBarBtn.setText(speedBarVisible ? "▼" : "▲");
+
         loadSong();
         setupGestures();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("speedBarVisible", speedBarVisible);
     }
 
     private void initViews() {
@@ -120,6 +137,7 @@ public class SongViewActivity extends Activity {
         fontUpBtn = (Button) findViewById(R.id.fontUpBtn);
         fontDownBtn = (Button) findViewById(R.id.fontDownBtn);
         scrollBarBtn = (Button) findViewById(R.id.scrollBarBtn);
+        themeBtn = (Button) findViewById(R.id.themeBtn);
         speedSeekBar = (SeekBar) findViewById(R.id.speedSeekBar);
 
         transposeUpBtn.setOnClickListener(new View.OnClickListener() {
@@ -171,6 +189,15 @@ public class SongViewActivity extends Activity {
             }
         });
 
+        themeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleTheme();
+            }
+        });
+
+        updateThemeButton();
+
         speedSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -220,6 +247,19 @@ public class SongViewActivity extends Activity {
         } else {
             speedBar.setVisibility(View.GONE);
             scrollBarBtn.setText("▲");
+        }
+    }
+
+    private void toggleTheme() {
+        ThemeManager.toggleDarkMode(this);
+        recreate();
+    }
+
+    private void updateThemeButton() {
+        if (ThemeManager.isDarkMode(this)) {
+            themeBtn.setText(R.string.theme_icon_sun);
+        } else {
+            themeBtn.setText(R.string.theme_icon_moon);
         }
     }
 

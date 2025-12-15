@@ -33,6 +33,7 @@ public class SetListViewActivity extends Activity {
     private Button addSongBtn;
     private Button playSetlistBtn;
     private Button editSetlistBtn;
+    private Button themeBtn;
 
     private SetList setList;
     private List<SetList.SetListItem> items = new ArrayList<SetList.SetListItem>();
@@ -55,6 +56,16 @@ public class SetListViewActivity extends Activity {
         addSongBtn = (Button) findViewById(R.id.addSongBtn);
         playSetlistBtn = (Button) findViewById(R.id.playSetlistBtn);
         editSetlistBtn = (Button) findViewById(R.id.editSetlistBtn);
+        themeBtn = (Button) findViewById(R.id.themeBtn);
+
+        updateThemeButton();
+
+        themeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleTheme();
+            }
+        });
 
         adapter = new SongListAdapter();
         songListView.setAdapter(adapter);
@@ -105,6 +116,19 @@ public class SetListViewActivity extends Activity {
         });
 
         loadSetList();
+    }
+
+    private void toggleTheme() {
+        ThemeManager.toggleDarkMode(this);
+        recreate();
+    }
+
+    private void updateThemeButton() {
+        if (ThemeManager.isDarkMode(this)) {
+            themeBtn.setText(R.string.theme_icon_sun);
+        } else {
+            themeBtn.setText(R.string.theme_icon_moon);
+        }
     }
 
     @Override

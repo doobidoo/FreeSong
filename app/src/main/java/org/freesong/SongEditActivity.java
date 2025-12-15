@@ -30,6 +30,7 @@ public class SongEditActivity extends Activity {
     private EditText songEditor;
     private Button cancelBtn;
     private Button saveBtn;
+    private Button themeBtn;
     private String songPath;
     private String originalContent;
 
@@ -45,8 +46,17 @@ public class SongEditActivity extends Activity {
         songEditor = (EditText) findViewById(R.id.songEditor);
         cancelBtn = (Button) findViewById(R.id.cancelBtn);
         saveBtn = (Button) findViewById(R.id.saveBtn);
+        themeBtn = (Button) findViewById(R.id.themeBtn);
 
         applyThemeColors();
+        updateThemeButton();
+
+        themeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleTheme();
+            }
+        });
 
         songPath = getIntent().getStringExtra("songPath");
         if (songPath == null) {
@@ -85,6 +95,19 @@ public class SongEditActivity extends Activity {
             titleText.setTextColor(getResources().getColor(R.color.text_primary_light));
             songEditor.setBackgroundColor(getResources().getColor(R.color.editor_background_light));
             songEditor.setTextColor(getResources().getColor(R.color.editor_text_light));
+        }
+    }
+
+    private void toggleTheme() {
+        ThemeManager.toggleDarkMode(this);
+        recreate();
+    }
+
+    private void updateThemeButton() {
+        if (ThemeManager.isDarkMode(this)) {
+            themeBtn.setText(R.string.theme_icon_sun);
+        } else {
+            themeBtn.setText(R.string.theme_icon_moon);
         }
     }
 

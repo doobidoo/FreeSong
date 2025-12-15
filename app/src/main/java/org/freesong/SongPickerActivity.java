@@ -32,6 +32,7 @@ public class SongPickerActivity extends Activity {
     private TextView selectedCountText;
     private Button cancelBtn;
     private Button addBtn;
+    private Button themeBtn;
 
     private List<File> songFiles = new ArrayList<File>();
     private Map<File, String> songTitles = new HashMap<File, String>();
@@ -59,6 +60,16 @@ public class SongPickerActivity extends Activity {
         selectedCountText = (TextView) findViewById(R.id.selectedCountText);
         cancelBtn = (Button) findViewById(R.id.cancelBtn);
         addBtn = (Button) findViewById(R.id.addBtn);
+        themeBtn = (Button) findViewById(R.id.themeBtn);
+
+        updateThemeButton();
+
+        themeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleTheme();
+            }
+        });
 
         loadSongs();
         setupListView();
@@ -79,6 +90,19 @@ public class SongPickerActivity extends Activity {
         });
 
         updateSelectedCount();
+    }
+
+    private void toggleTheme() {
+        ThemeManager.toggleDarkMode(this);
+        recreate();
+    }
+
+    private void updateThemeButton() {
+        if (ThemeManager.isDarkMode(this)) {
+            themeBtn.setText(R.string.theme_icon_sun);
+        } else {
+            themeBtn.setText(R.string.theme_icon_moon);
+        }
     }
 
     private void loadSongs() {

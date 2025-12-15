@@ -30,6 +30,7 @@ public class SetListsActivity extends Activity {
     private ListView setlistListView;
     private TextView emptyText;
     private Button newSetlistBtn;
+    private Button themeBtn;
 
     private List<SetList> setLists = new ArrayList<SetList>();
     private SetListAdapter adapter;
@@ -46,6 +47,16 @@ public class SetListsActivity extends Activity {
         setlistListView = (ListView) findViewById(R.id.setlistListView);
         emptyText = (TextView) findViewById(R.id.emptyText);
         newSetlistBtn = (Button) findViewById(R.id.newSetlistBtn);
+        themeBtn = (Button) findViewById(R.id.themeBtn);
+
+        updateThemeButton();
+
+        themeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleTheme();
+            }
+        });
 
         adapter = new SetListAdapter();
         setlistListView.setAdapter(adapter);
@@ -178,6 +189,19 @@ public class SetListsActivity extends Activity {
 
         builder.setNegativeButton("Cancel", null);
         builder.show();
+    }
+
+    private void toggleTheme() {
+        ThemeManager.toggleDarkMode(this);
+        recreate();
+    }
+
+    private void updateThemeButton() {
+        if (ThemeManager.isDarkMode(this)) {
+            themeBtn.setText(R.string.theme_icon_sun);
+        } else {
+            themeBtn.setText(R.string.theme_icon_moon);
+        }
     }
 
     private void confirmDelete(final SetList setList) {

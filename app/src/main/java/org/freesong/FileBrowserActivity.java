@@ -34,6 +34,7 @@ public class FileBrowserActivity extends Activity {
     private ListView fileListView;
     private TextView pathText;
     private Button cancelBtn;
+    private Button themeBtn;
 
     private File currentDir;
     private List<File> files = new ArrayList<File>();
@@ -48,6 +49,16 @@ public class FileBrowserActivity extends Activity {
         fileListView = (ListView) findViewById(R.id.fileListView);
         pathText = (TextView) findViewById(R.id.pathText);
         cancelBtn = (Button) findViewById(R.id.cancelBtn);
+        themeBtn = (Button) findViewById(R.id.themeBtn);
+
+        updateThemeButton();
+
+        themeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleTheme();
+            }
+        });
 
         adapter = new FileAdapter();
         fileListView.setAdapter(adapter);
@@ -75,6 +86,19 @@ public class FileBrowserActivity extends Activity {
         // Start at external storage root
         currentDir = Environment.getExternalStorageDirectory();
         loadFiles();
+    }
+
+    private void toggleTheme() {
+        ThemeManager.toggleDarkMode(this);
+        recreate();
+    }
+
+    private void updateThemeButton() {
+        if (ThemeManager.isDarkMode(this)) {
+            themeBtn.setText(R.string.theme_icon_sun);
+        } else {
+            themeBtn.setText(R.string.theme_icon_moon);
+        }
     }
 
     @Override
