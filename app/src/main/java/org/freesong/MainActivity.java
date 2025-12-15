@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -40,6 +42,7 @@ public class MainActivity extends Activity {
     private Button setlistsBtn;
     private Button themeBtn;
     private Button importBtn;
+    private Button aboutBtn;
     private EditText searchField;
     private List<File> allSongFiles = new ArrayList<File>();
     private List<File> filteredSongFiles = new ArrayList<File>();
@@ -58,7 +61,15 @@ public class MainActivity extends Activity {
         setlistsBtn = (Button) findViewById(R.id.setlistsBtn);
         themeBtn = (Button) findViewById(R.id.themeBtn);
         importBtn = (Button) findViewById(R.id.importBtn);
+        aboutBtn = (Button) findViewById(R.id.aboutBtn);
         searchField = (EditText) findViewById(R.id.searchField);
+
+        aboutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAboutDialog();
+            }
+        });
 
         setlistsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -363,6 +374,29 @@ public class MainActivity extends Activity {
                 }
             })
             .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void showAboutDialog() {
+        String version = "Unknown";
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            version = pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            // Use default
+        }
+
+        StringBuilder message = new StringBuilder();
+        message.append("Version: ").append(version).append("\n\n");
+        message.append("Author: ").append(getString(R.string.app_author)).append("\n\n");
+        message.append(getString(R.string.app_description)).append("\n\n");
+        message.append("License: ").append(getString(R.string.app_license)).append("\n\n");
+        message.append(getString(R.string.app_url));
+
+        new AlertDialog.Builder(this)
+            .setTitle(getString(R.string.app_name))
+            .setMessage(message.toString())
+            .setPositiveButton("OK", null)
             .show();
     }
 }

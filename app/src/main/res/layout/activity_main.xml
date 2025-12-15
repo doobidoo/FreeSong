@@ -20,6 +20,14 @@
             android:textStyle="bold" />
 
         <Button
+            android:id="@+id/aboutBtn"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:text="@string/about_icon"
+            android:textSize="18sp"
+            android:layout_marginRight="4dp" />
+
+        <Button
             android:id="@+id/importBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
