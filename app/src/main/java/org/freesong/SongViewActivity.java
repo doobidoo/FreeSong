@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -35,14 +36,23 @@ public class SongViewActivity extends Activity {
     private boolean autoScrolling = false;
     private int scrollSpeed = 50; // pixels per second
     private float fontSize = 18f;
+    private boolean scrollBarVisible = true;
 
     // Setlist navigation support
     private ArrayList<String> setlistPaths;
     private int currentIndex = -1;
 
+    // Layout views for theme coloring
+    private LinearLayout rootLayout;
+    private LinearLayout headerLayout;
+    private LinearLayout controlBar;
+    private LinearLayout speedBar;
+
     private TextView titleText;
     private TextView artistText;
     private TextView keyText;
+    private TextView keyLabel;
+    private TextView speedLabel;
     private TextView songContent;
     private ScrollView scrollView;
     private Button transposeUpBtn;
@@ -51,6 +61,7 @@ public class SongViewActivity extends Activity {
     private Button editBtn;
     private Button fontUpBtn;
     private Button fontDownBtn;
+    private Button scrollBarBtn;
     private SeekBar speedSeekBar;
 
     private Handler scrollHandler = new Handler();
@@ -58,6 +69,8 @@ public class SongViewActivity extends Activity {
 
     private int chordColor;
     private int sectionColor;
+    private int keyColor;
+    private boolean isDarkMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,23 +82,35 @@ public class SongViewActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Set theme-aware colors
-        if (ThemeManager.isDarkMode(this)) {
+        isDarkMode = ThemeManager.isDarkMode(this);
+        if (isDarkMode) {
             chordColor = getResources().getColor(R.color.chord_color_dark);
             sectionColor = getResources().getColor(R.color.section_color_dark);
+            keyColor = getResources().getColor(R.color.key_color_dark);
         } else {
             chordColor = getResources().getColor(R.color.chord_color_light);
             sectionColor = getResources().getColor(R.color.section_color_light);
+            keyColor = getResources().getColor(R.color.key_color_light);
         }
 
         initViews();
+        applyThemeColors();
         loadSong();
         setupGestures();
     }
 
     private void initViews() {
+        // Layout containers for theme coloring
+        rootLayout = (LinearLayout) findViewById(R.id.rootLayout);
+        headerLayout = (LinearLayout) findViewById(R.id.headerLayout);
+        controlBar = (LinearLayout) findViewById(R.id.controlBar);
+        speedBar = (LinearLayout) findViewById(R.id.speedBar);
+
         titleText = (TextView) findViewById(R.id.titleText);
         artistText = (TextView) findViewById(R.id.artistText);
         keyText = (TextView) findViewById(R.id.keyText);
+        keyLabel = (TextView) findViewById(R.id.keyLabel);
+        speedLabel = (TextView) findViewById(R.id.speedLabel);
         songContent = (TextView) findViewById(R.id.songContent);
         scrollView = (ScrollView) findViewById(R.id.scrollView);
         transposeUpBtn = (Button) findViewById(R.id.transposeUpBtn);
@@ -94,6 +119,7 @@ public class SongViewActivity extends Activity {
         editBtn = (Button) findViewById(R.id.editBtn);
         fontUpBtn = (Button) findViewById(R.id.fontUpBtn);
         fontDownBtn = (Button) findViewById(R.id.fontDownBtn);
+        scrollBarBtn = (Button) findViewById(R.id.scrollBarBtn);
         speedSeekBar = (SeekBar) findViewById(R.id.speedSeekBar);
 
         transposeUpBtn.setOnClickListener(new View.OnClickListener() {
@@ -138,6 +164,13 @@ public class SongViewActivity extends Activity {
             }
         });
 
+        scrollBarBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleScrollBar();
+            }
+        });
+
         speedSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -152,6 +185,40 @@ public class SongViewActivity extends Activity {
         });
 
         speedSeekBar.setProgress(20); // Default medium speed
+    }
+
+    private void applyThemeColors() {
+        if (isDarkMode) {
+            rootLayout.setBackgroundColor(getResources().getColor(R.color.background_dark));
+            headerLayout.setBackgroundColor(getResources().getColor(R.color.header_background_dark));
+            controlBar.setBackgroundColor(getResources().getColor(R.color.control_bar_dark));
+            speedBar.setBackgroundColor(getResources().getColor(R.color.speed_bar_dark));
+            titleText.setTextColor(getResources().getColor(R.color.text_primary_dark));
+            artistText.setTextColor(getResources().getColor(R.color.text_secondary_dark));
+            keyLabel.setTextColor(getResources().getColor(R.color.text_secondary_dark));
+            speedLabel.setTextColor(getResources().getColor(R.color.text_secondary_dark));
+            songContent.setTextColor(getResources().getColor(R.color.text_primary_dark));
+        } else {
+            rootLayout.setBackgroundColor(getResources().getColor(R.color.background_light));
+            headerLayout.setBackgroundColor(getResources().getColor(R.color.header_background_light));
+            controlBar.setBackgroundColor(getResources().getColor(R.color.control_bar_light));
+            speedBar.setBackgroundColor(getResources().getColor(R.color.speed_bar_light));
+            titleText.setTextColor(getResources().getColor(R.color.text_primary_light));
+            artistText.setTextColor(getResources().getColor(R.color.text_secondary_light));
+            keyLabel.setTextColor(getResources().getColor(R.color.text_secondary_light));
+            speedLabel.setTextColor(getResources().getColor(R.color.text_secondary_light));
+            songContent.setTextColor(getResources().getColor(R.color.text_primary_light));
+        }
+        keyText.setTextColor(keyColor);
+    }
+
+    private void toggleScrollBar() {
+        scrollBarVisible = !scrollBarVisible;
+        if (scrollBarVisible) {
+            scrollView.setVerticalScrollBarEnabled(true);
+        } else {
+            scrollView.setVerticalScrollBarEnabled(false);
+        }
     }
 
     private void openEditor() {

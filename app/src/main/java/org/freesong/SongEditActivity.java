@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -22,6 +24,9 @@ import java.io.OutputStreamWriter;
  */
 public class SongEditActivity extends Activity {
 
+    private LinearLayout rootLayout;
+    private LinearLayout headerLayout;
+    private TextView titleText;
     private EditText songEditor;
     private Button cancelBtn;
     private Button saveBtn;
@@ -34,9 +39,14 @@ public class SongEditActivity extends Activity {
         ThemeManager.applyTheme(this);
         setContentView(R.layout.activity_song_edit);
 
+        rootLayout = (LinearLayout) findViewById(R.id.editRootLayout);
+        headerLayout = (LinearLayout) findViewById(R.id.editHeaderLayout);
+        titleText = (TextView) findViewById(R.id.editTitleText);
         songEditor = (EditText) findViewById(R.id.songEditor);
         cancelBtn = (Button) findViewById(R.id.cancelBtn);
         saveBtn = (Button) findViewById(R.id.saveBtn);
+
+        applyThemeColors();
 
         songPath = getIntent().getStringExtra("songPath");
         if (songPath == null) {
@@ -60,6 +70,22 @@ public class SongEditActivity extends Activity {
                 saveSong();
             }
         });
+    }
+
+    private void applyThemeColors() {
+        if (ThemeManager.isDarkMode(this)) {
+            rootLayout.setBackgroundColor(getResources().getColor(R.color.background_dark));
+            headerLayout.setBackgroundColor(getResources().getColor(R.color.header_background_dark));
+            titleText.setTextColor(getResources().getColor(R.color.text_primary_dark));
+            songEditor.setBackgroundColor(getResources().getColor(R.color.editor_background_dark));
+            songEditor.setTextColor(getResources().getColor(R.color.editor_text_dark));
+        } else {
+            rootLayout.setBackgroundColor(getResources().getColor(R.color.background_light));
+            headerLayout.setBackgroundColor(getResources().getColor(R.color.header_background_light));
+            titleText.setTextColor(getResources().getColor(R.color.text_primary_light));
+            songEditor.setBackgroundColor(getResources().getColor(R.color.editor_background_light));
+            songEditor.setTextColor(getResources().getColor(R.color.editor_text_light));
+        }
     }
 
     private void loadSong() {

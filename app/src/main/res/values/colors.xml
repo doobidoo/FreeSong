@@ -3,18 +3,30 @@
 
     <!-- Light Theme Colors -->
     <color name="background_light">#FFFFFF</color>
+    <color name="header_background_light">#F5F5F5</color>
+    <color name="control_bar_light">#EEEEEE</color>
+    <color name="speed_bar_light">#E0E0E0</color>
     <color name="text_primary_light">#212121</color>
     <color name="text_secondary_light">#666666</color>
     <color name="divider_light">#CCCCCC</color>
     <color name="chord_color_light">#0066CC</color>
     <color name="section_color_light">#666666</color>
+    <color name="key_color_light">#0066CC</color>
+    <color name="editor_background_light">#FFFFFF</color>
+    <color name="editor_text_light">#212121</color>
 
     <!-- Dark Theme Colors -->
     <color name="background_dark">#1A1A1A</color>
+    <color name="header_background_dark">#252525</color>
+    <color name="control_bar_dark">#2A2A2A</color>
+    <color name="speed_bar_dark">#333333</color>
     <color name="text_primary_dark">#E0E0E0</color>
     <color name="text_secondary_dark">#AAAAAA</color>
     <color name="divider_dark">#333333</color>
     <color name="chord_color_dark">#66AAFF</color>
     <color name="section_color_dark">#888888</color>
+    <color name="key_color_dark">#66AAFF</color>
+    <color name="editor_background_dark">#1A1A1A</color>
+    <color name="editor_text_dark">#E0E0E0</color>
 
 </resources>

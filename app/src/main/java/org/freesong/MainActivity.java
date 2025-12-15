@@ -102,8 +102,10 @@ public class MainActivity extends Activity {
         // Show sun in dark mode (to switch to light), moon in light mode (to switch to dark)
         if (ThemeManager.isDarkMode(this)) {
             themeBtn.setText(R.string.theme_icon_sun);
+            themeBtn.setTextColor(getResources().getColor(R.color.text_primary_dark));
         } else {
             themeBtn.setText(R.string.theme_icon_moon);
+            themeBtn.setTextColor(0xFF333333); // Dark text for visibility on light background
         }
     }
 
