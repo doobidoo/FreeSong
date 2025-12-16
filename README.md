@@ -108,9 +108,17 @@ FreeSong automatically handles character encoding:
 - OnSong backup imports convert from Mac Roman to UTF-8
 - Special characters (umlauts, accents, etc.) are preserved
 
+## Disclaimer
+
+**USE AT YOUR OWN RISK.** This software is provided "as is", without warranty of any kind, express or implied. The authors and contributors are not responsible for any damages or data loss that may result from using this application.
+
+- **No Support**: There is no entitlement to support of any kind. While community discussions are welcome, responses are not guaranteed.
+- **No Warranty**: This software is provided without any warranty. See the LICENSE file for details.
+- **Data Responsibility**: You are responsible for backing up your own song files and data.
+
 ## License
 
-This project is open source. Feel free to use, modify, and distribute.
+This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
