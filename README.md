@@ -1,5 +1,12 @@
 # FreeSong
 
+[![GitHub Release](https://img.shields.io/github/v/release/doobidoo/FreeSong)](https://github.com/doobidoo/FreeSong/releases)
+[![Build Status](https://github.com/doobidoo/FreeSong/actions/workflows/release.yml/badge.svg)](https://github.com/doobidoo/FreeSong/actions)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Android](https://img.shields.io/badge/Android-4.4%2B-green.svg)](https://developer.android.com)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/doobidoo/FreeSong)
+[![GitHub Discussions](https://img.shields.io/github/discussions/doobidoo/FreeSong)](https://github.com/doobidoo/FreeSong/discussions)
+
 A free, open-source chord sheet and lyrics viewer for Android, designed as an alternative to OnSong. Built specifically for older Android devices (Android 4.4+) like the Samsung Galaxy Tab 2.
 
 ## Features
