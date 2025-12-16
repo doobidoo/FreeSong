@@ -11,6 +11,7 @@ public class ThemeManager {
 
     private static final String PREFS_NAME = "FreeSongPrefs";
     private static final String KEY_DARK_MODE = "dark_mode";
+    private static final String KEY_SPEED_BAR_VISIBLE = "speed_bar_visible";
 
     public static boolean isDarkMode(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -24,6 +25,16 @@ public class ThemeManager {
 
     public static void toggleDarkMode(Context context) {
         setDarkMode(context, !isDarkMode(context));
+    }
+
+    public static boolean isSpeedBarVisible(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(KEY_SPEED_BAR_VISIBLE, true);
+    }
+
+    public static void setSpeedBarVisible(Context context, boolean visible) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_SPEED_BAR_VISIBLE, visible).apply();
     }
 
     /**

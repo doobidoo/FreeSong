@@ -79,10 +79,8 @@ public class SongViewActivity extends Activity {
         ThemeManager.applyFullscreenTheme(this);
         setContentView(R.layout.activity_song_view);
 
-        // Restore state if available
-        if (savedInstanceState != null) {
-            speedBarVisible = savedInstanceState.getBoolean("speedBarVisible", true);
-        }
+        // Restore speed bar visibility from preferences (persists across app exits)
+        speedBarVisible = ThemeManager.isSpeedBarVisible(this);
 
         // Keep screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -108,12 +106,6 @@ public class SongViewActivity extends Activity {
 
         loadSong();
         setupGestures();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean("speedBarVisible", speedBarVisible);
     }
 
     private void initViews() {
@@ -241,6 +233,7 @@ public class SongViewActivity extends Activity {
 
     private void toggleSpeedBar() {
         speedBarVisible = !speedBarVisible;
+        ThemeManager.setSpeedBarVisible(this, speedBarVisible);
         if (speedBarVisible) {
             speedBar.setVisibility(View.VISIBLE);
             scrollBarBtn.setText("▼");
