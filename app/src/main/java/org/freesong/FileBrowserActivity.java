@@ -172,7 +172,10 @@ public class FileBrowserActivity extends Activity {
         return BackupImporter.isBackupFile(name) ||
                name.endsWith(".onsong") ||
                name.endsWith(".chordpro") ||
-               name.endsWith(".cho");
+               name.endsWith(".cho") ||
+               name.endsWith(".crd") ||
+               name.endsWith(".pro") ||
+               name.endsWith(".txt");
     }
 
     private void selectFile(final File file) {
