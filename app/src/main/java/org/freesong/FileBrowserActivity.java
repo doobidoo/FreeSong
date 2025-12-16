@@ -226,7 +226,7 @@ public class FileBrowserActivity extends Activity {
             @Override
             protected BackupImporter.ImportResult doInBackground(Void... params) {
                 try {
-                    return BackupImporter.importBackup(file);
+                    return BackupImporter.importBackup(file, FileBrowserActivity.this);
                 } catch (Exception e) {
                     error = e;
                     return null;
@@ -247,12 +247,18 @@ public class FileBrowserActivity extends Activity {
                 }
 
                 StringBuilder message = new StringBuilder();
-                message.append("Imported: ").append(result.importedFiles).append(" songs\n");
+                message.append("Songs imported: ").append(result.importedFiles).append("\n");
                 if (result.skippedFiles > 0) {
-                    message.append("Skipped: ").append(result.skippedFiles).append(" (already exist)\n");
+                    message.append("Songs skipped: ").append(result.skippedFiles).append(" (already exist)\n");
+                }
+                if (result.importedSetlists > 0) {
+                    message.append("\nSetlists imported: ").append(result.importedSetlists).append("\n");
+                }
+                if (result.skippedSetlists > 0) {
+                    message.append("Setlists skipped: ").append(result.skippedSetlists).append(" (already exist)\n");
                 }
                 if (!result.errors.isEmpty()) {
-                    message.append("Errors: ").append(result.errors.size());
+                    message.append("\nErrors: ").append(result.errors.size());
                 }
 
                 new AlertDialog.Builder(FileBrowserActivity.this)

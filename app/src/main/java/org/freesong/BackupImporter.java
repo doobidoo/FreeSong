@@ -1,5 +1,6 @@
 package org.freesong;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
@@ -32,7 +33,10 @@ public class BackupImporter {
         public int totalFiles = 0;
         public int importedFiles = 0;
         public int skippedFiles = 0;
+        public int importedSetlists = 0;
+        public int skippedSetlists = 0;
         public List<String> importedNames = new ArrayList<String>();
+        public List<String> importedSetlistNames = new ArrayList<String>();
         public List<String> errors = new ArrayList<String>();
     }
 
@@ -41,6 +45,15 @@ public class BackupImporter {
      * Supports both loose song files and OnSong SQLite database.
      */
     public static ImportResult importBackup(File backupFile) throws IOException {
+        return importBackup(backupFile, null);
+    }
+
+    /**
+     * Import songs and optionally setlists from a backup file.
+     * @param backupFile The backup file to import
+     * @param context Context for setlist import (pass null to skip setlist import)
+     */
+    public static ImportResult importBackup(File backupFile, Context context) throws IOException {
         ImportResult result = new ImportResult();
 
         File destDir = new File(Environment.getExternalStorageDirectory(), "FreeSong");
@@ -125,6 +138,10 @@ public class BackupImporter {
         if (tempDbFile != null && tempDbFile.exists()) {
             try {
                 importFromSqliteDatabase(tempDbFile, destDir, result);
+                // Import setlists if context provided
+                if (context != null) {
+                    importSetlistsFromDatabase(tempDbFile, destDir, context, result);
+                }
             } catch (Exception e) {
                 result.errors.add("Database import: " + e.getMessage());
             } finally {
@@ -240,6 +257,160 @@ public class BackupImporter {
                 writer.close();
             }
         }
+    }
+
+    /**
+     * Import setlists from OnSong SQLite database.
+     */
+    private static void importSetlistsFromDatabase(File dbFile, File songsDir, Context context, ImportResult result) {
+        SQLiteDatabase db = null;
+        Cursor setlistCursor = null;
+        try {
+            db = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
+            SetListDbHelper dbHelper = SetListDbHelper.getInstance(context);
+
+            // Get existing setlist names to avoid duplicates
+            List<SetList> existingSetlists = dbHelper.getAllSetLists();
+            List<String> existingNames = new ArrayList<String>();
+            for (SetList sl : existingSetlists) {
+                existingNames.add(sl.getName().toLowerCase());
+            }
+
+            // Query all setlists
+            setlistCursor = db.rawQuery(
+                "SELECT ID, title FROM SongSet WHERE title IS NOT NULL AND title != '' ORDER BY title",
+                null
+            );
+
+            while (setlistCursor.moveToNext()) {
+                String setlistId = setlistCursor.getString(0);
+                String setlistTitle = setlistCursor.getString(1);
+
+                if (setlistTitle == null || setlistTitle.trim().isEmpty()) {
+                    continue;
+                }
+
+                // Skip if setlist already exists
+                if (existingNames.contains(setlistTitle.toLowerCase().trim())) {
+                    result.skippedSetlists++;
+                    continue;
+                }
+
+                // Get songs in this setlist
+                Cursor itemsCursor = null;
+                try {
+                    itemsCursor = db.rawQuery(
+                        "SELECT s.title, s.key, s.byline FROM SongSetItem ssi " +
+                        "JOIN Song s ON ssi.songID = s.ID " +
+                        "WHERE ssi.setID = ? ORDER BY ssi.orderIndex",
+                        new String[]{setlistId}
+                    );
+
+                    if (itemsCursor.getCount() == 0) {
+                        continue; // Empty setlist
+                    }
+
+                    // Create the setlist
+                    SetList newSetList = new SetList(setlistTitle.trim());
+                    long newSetlistId = dbHelper.createSetList(newSetList);
+                    int songsAdded = 0;
+
+                    while (itemsCursor.moveToNext()) {
+                        String songTitle = itemsCursor.getString(0);
+                        String songKey = itemsCursor.getString(1);
+                        String songArtist = itemsCursor.getString(2);
+
+                        if (songTitle == null || songTitle.trim().isEmpty()) {
+                            continue;
+                        }
+
+                        // Try to find matching song file
+                        File songFile = findSongFile(songsDir, songTitle, songKey);
+                        if (songFile != null) {
+                            SetList.SetListItem item = new SetList.SetListItem(
+                                songFile.getAbsolutePath(),
+                                songTitle,
+                                songArtist != null ? songArtist : ""
+                            );
+                            dbHelper.addItemToSetList(newSetlistId, item);
+                            songsAdded++;
+                        }
+                    }
+
+                    if (songsAdded > 0) {
+                        result.importedSetlists++;
+                        result.importedSetlistNames.add(setlistTitle + " (" + songsAdded + " songs)");
+                    } else {
+                        // Remove empty setlist
+                        dbHelper.deleteSetList(newSetlistId);
+                    }
+
+                } finally {
+                    if (itemsCursor != null) {
+                        itemsCursor.close();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            result.errors.add("Setlist import: " + e.getMessage());
+        } finally {
+            if (setlistCursor != null) {
+                setlistCursor.close();
+            }
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
+
+    /**
+     * Find a song file by title and optional key.
+     */
+    private static File findSongFile(File songsDir, String title, String key) {
+        if (!songsDir.exists()) return null;
+
+        String safeTitle = sanitizeFileName(title);
+
+        // Try different filename patterns
+        String[] patterns;
+        if (key != null && !key.trim().isEmpty()) {
+            patterns = new String[]{
+                safeTitle + "-" + key.trim() + ".onsong",
+                safeTitle + ".onsong",
+                safeTitle + "-" + key.trim() + ".txt",
+                safeTitle + ".txt",
+                safeTitle + ".chordpro",
+                safeTitle + ".cho"
+            };
+        } else {
+            patterns = new String[]{
+                safeTitle + ".onsong",
+                safeTitle + ".txt",
+                safeTitle + ".chordpro",
+                safeTitle + ".cho"
+            };
+        }
+
+        for (String pattern : patterns) {
+            File file = new File(songsDir, pattern);
+            if (file.exists()) {
+                return file;
+            }
+        }
+
+        // Try case-insensitive search
+        File[] files = songsDir.listFiles();
+        if (files != null) {
+            String lowerTitle = safeTitle.toLowerCase();
+            for (File file : files) {
+                String name = file.getName().toLowerCase();
+                if (name.startsWith(lowerTitle) && isSongFile(name)) {
+                    return file;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

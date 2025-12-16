@@ -327,19 +327,25 @@ public class MainActivity extends Activity {
             }
             info.append("File: ").append(file.getName());
 
+            String[] options = {"Open", "Add to Setlist", "Delete"};
+
             new AlertDialog.Builder(this)
-                .setTitle("Song Info")
+                .setTitle(song.getTitle())
                 .setMessage(info.toString())
-                .setPositiveButton("Open", new DialogInterface.OnClickListener() {
+                .setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        openSong(file);
-                    }
-                })
-                .setNeutralButton("Add to Setlist", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        showAddToSetlistDialog(file, song);
+                        switch (which) {
+                            case 0: // Open
+                                openSong(file);
+                                break;
+                            case 1: // Add to Setlist
+                                showAddToSetlistDialog(file, song);
+                                break;
+                            case 2: // Delete
+                                confirmDeleteSong(file, song.getTitle());
+                                break;
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -347,6 +353,25 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             Toast.makeText(this, "Error reading song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void confirmDeleteSong(final File file, String title) {
+        new AlertDialog.Builder(this)
+            .setTitle("Delete Song")
+            .setMessage("Delete \"" + title + "\"?\n\nFile: " + file.getName() + "\n\nThis cannot be undone.")
+            .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (file.delete()) {
+                        Toast.makeText(MainActivity.this, "Song deleted", Toast.LENGTH_SHORT).show();
+                        loadSongs();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Could not delete file", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 
     private void showAddToSetlistDialog(final File file, final Song song) {
