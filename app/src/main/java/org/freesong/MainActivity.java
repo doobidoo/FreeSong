@@ -149,7 +149,10 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadSongs();
+        // Only reload if list is empty (first load or after import)
+        if (allSongFiles.isEmpty()) {
+            loadSongs();
+        }
     }
 
     private void setupSongList() {
@@ -178,7 +181,9 @@ public class MainActivity extends Activity {
         emptyText.setVisibility(View.VISIBLE);
         songListView.setVisibility(View.GONE);
 
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void, Integer, Void>() {
+            private int totalFiles = 0;
+
             @Override
             protected Void doInBackground(Void... params) {
                 allSongFiles.clear();
@@ -210,15 +215,29 @@ public class MainActivity extends Activity {
                     }
                 };
 
+                // First pass: collect all files
+                List<File> filesToLoad = new ArrayList<File>();
                 for (File dir : searchDirs) {
                     if (dir.exists() && dir.isDirectory()) {
                         File[] files = dir.listFiles(songFilter);
                         if (files != null) {
                             for (File file : files) {
-                                allSongFiles.add(file);
-                                loadSongInfo(file);
+                                filesToLoad.add(file);
                             }
                         }
+                    }
+                }
+
+                totalFiles = filesToLoad.size();
+                int loaded = 0;
+
+                // Second pass: load metadata with progress
+                for (File file : filesToLoad) {
+                    allSongFiles.add(file);
+                    loadSongInfo(file);
+                    loaded++;
+                    if (loaded % 50 == 0 || loaded == totalFiles) {
+                        publishProgress(loaded);
                     }
                 }
 
@@ -235,6 +254,11 @@ public class MainActivity extends Activity {
                 });
 
                 return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                emptyText.setText("Loading songs... " + values[0] + "/" + totalFiles);
             }
 
             @Override
@@ -383,7 +407,11 @@ public class MainActivity extends Activity {
                 public void onClick(DialogInterface dialog, int which) {
                     if (file.delete()) {
                         Toast.makeText(MainActivity.this, "Song deleted", Toast.LENGTH_SHORT).show();
-                        loadSongs();
+                        // Remove from lists without full reload
+                        allSongFiles.remove(file);
+                        songTitles.remove(file);
+                        songArtists.remove(file);
+                        filterSongs(searchField.getText().toString());
                     } else {
                         Toast.makeText(MainActivity.this, "Could not delete file", Toast.LENGTH_SHORT).show();
                     }

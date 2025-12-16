@@ -5,6 +5,15 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-12-16
+
+### Added
+- **Loading Progress**: Shows progress while loading songs (e.g., "Loading songs... 500/996")
+
+### Fixed
+- **Performance**: Songs are now cached - no reload when returning from setlists
+- **Delete**: Deleting a song no longer triggers full library reload
+
 ## [1.4.0] - 2025-12-16
 
 ### Fixed
