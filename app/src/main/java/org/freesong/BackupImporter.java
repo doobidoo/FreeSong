@@ -1,5 +1,7 @@
 package org.freesong;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 
 import java.io.BufferedInputStream;
@@ -36,6 +38,7 @@ public class BackupImporter {
 
     /**
      * Import songs from a backup file (ZIP format).
+     * Supports both loose song files and OnSong SQLite database.
      */
     public static ImportResult importBackup(File backupFile) throws IOException {
         ImportResult result = new ImportResult();
@@ -45,6 +48,9 @@ public class BackupImporter {
             destDir.mkdirs();
         }
 
+        // Temporary file for SQLite database extraction
+        File tempDbFile = null;
+
         ZipInputStream zis = null;
         try {
             zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(backupFile)));
@@ -53,8 +59,16 @@ public class BackupImporter {
             while ((entry = zis.getNextEntry()) != null) {
                 String name = entry.getName();
 
-                // Skip directories and non-song files
+                // Skip directories
                 if (entry.isDirectory()) {
+                    continue;
+                }
+
+                // Check for OnSong SQLite database
+                if (name.equals("OnSong.sqlite3") || name.endsWith("/OnSong.sqlite3")) {
+                    tempDbFile = new File(destDir, ".onsong_temp.sqlite3");
+                    extractBinaryFile(zis, tempDbFile);
+                    zis.closeEntry();
                     continue;
                 }
 
@@ -107,7 +121,125 @@ public class BackupImporter {
             }
         }
 
+        // Import songs from SQLite database if found
+        if (tempDbFile != null && tempDbFile.exists()) {
+            try {
+                importFromSqliteDatabase(tempDbFile, destDir, result);
+            } catch (Exception e) {
+                result.errors.add("Database import: " + e.getMessage());
+            } finally {
+                // Clean up temporary database file
+                tempDbFile.delete();
+            }
+        }
+
         return result;
+    }
+
+    /**
+     * Import songs from OnSong SQLite database.
+     */
+    private static void importFromSqliteDatabase(File dbFile, File destDir, ImportResult result) {
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
+        try {
+            db = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
+
+            // Query songs with content
+            cursor = db.rawQuery(
+                "SELECT title, byline, key, content FROM Song WHERE content IS NOT NULL AND content != ''",
+                null
+            );
+
+            while (cursor.moveToNext()) {
+                String title = cursor.getString(0);
+                String artist = cursor.getString(1);
+                String key = cursor.getString(2);
+                String content = cursor.getString(3);
+
+                // Skip if no title or content
+                if (title == null || title.trim().isEmpty() ||
+                    content == null || content.trim().isEmpty()) {
+                    continue;
+                }
+
+                result.totalFiles++;
+
+                // Create safe filename from title
+                String safeTitle = sanitizeFileName(title);
+                if (safeTitle.isEmpty()) {
+                    safeTitle = "Untitled_" + System.currentTimeMillis();
+                }
+
+                // Add key to filename if available
+                String fileName = safeTitle;
+                if (key != null && !key.trim().isEmpty()) {
+                    fileName = safeTitle + "-" + key.trim();
+                }
+                fileName = fileName + ".onsong";
+
+                File destFile = new File(destDir, fileName);
+
+                // Skip if file already exists
+                if (destFile.exists()) {
+                    result.skippedFiles++;
+                    continue;
+                }
+
+                try {
+                    // Write song content to file
+                    writeSongFile(destFile, content);
+                    result.importedFiles++;
+                    result.importedNames.add(title);
+                } catch (IOException e) {
+                    result.errors.add(title + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            result.errors.add("Failed to read database: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
+
+    /**
+     * Create a safe filename from song title.
+     */
+    private static String sanitizeFileName(String name) {
+        if (name == null) return "";
+        // Remove or replace invalid filename characters
+        String safe = name.replaceAll("[\\\\/:*?\"<>|]", "_");
+        // Remove leading/trailing spaces and dots
+        safe = safe.trim();
+        while (safe.endsWith(".")) {
+            safe = safe.substring(0, safe.length() - 1);
+        }
+        // Limit length
+        if (safe.length() > 100) {
+            safe = safe.substring(0, 100);
+        }
+        return safe;
+    }
+
+    /**
+     * Write song content to file as UTF-8.
+     */
+    private static void writeSongFile(File destFile, String content) throws IOException {
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile), UTF8));
+            writer.write(content);
+            writer.flush();
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
     }
 
     /**
