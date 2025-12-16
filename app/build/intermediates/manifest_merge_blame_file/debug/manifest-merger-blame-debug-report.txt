@@ -1,8 +1,8 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 3    package="org.freesong"
-4    android:versionCode="1"
-5    android:versionName="1.0.0" >
+4    android:versionCode="2"
+5    android:versionName="1.1.0" >
 6
 7    <uses-sdk
 8        android:minSdkVersion="19"
@@ -11,92 +11,101 @@
 11    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 11-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:4:5-80
 11-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:4:22-77
-12
-13    <application
-13-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:6:5-51:19
-14        android:allowBackup="true"
-14-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:7:9-35
-15        android:debuggable="true"
-16        android:icon="@drawable/ic_launcher"
-16-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:8:9-45
-17        android:label="@string/app_name"
-17-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:9:9-41
-18        android:theme="@style/AppTheme_Light" >
-18-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:10:9-46
-19        <activity
-19-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:12:9-28:20
-20            android:name="org.freesong.MainActivity"
-20-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:13:13-41
-21            android:exported="true"
-21-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:15:13-36
-22            android:label="@string/app_name" >
-22-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:14:13-45
-23            <intent-filter>
-23-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:16:13-19:29
-24                <action android:name="android.intent.action.MAIN" />
-24-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:17:17-69
-24-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:17:25-66
-25
-26                <category android:name="android.intent.category.LAUNCHER" />
-26-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:18:17-77
-26-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:18:27-74
-27            </intent-filter>
-28            <intent-filter>
-28-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:20:13-27:29
-29                <action android:name="android.intent.action.VIEW" />
-29-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:21:17-69
-29-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:21:25-66
-30
-31                <category android:name="android.intent.category.DEFAULT" />
-31-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:22:17-76
-31-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:22:27-73
-32
-33                <data android:mimeType="text/*" />
-33-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:23:17-51
-33-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:23:23-48
-34                <data android:pathPattern=".*\\.onsong" />
-34-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:23:17-51
-34-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:24:23-56
-35                <data android:pathPattern=".*\\.chordpro" />
-35-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:23:17-51
-35-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:24:23-56
-36                <data android:pathPattern=".*\\.cho" />
-36-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:23:17-51
-36-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:24:23-56
-37            </intent-filter>
-38        </activity>
-39        <activity
-39-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:30:9-33:64
-40            android:name="org.freesong.SongViewActivity"
-40-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:31:13-45
-41            android:label="@string/app_name"
+12    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+12-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:5:5-81
+12-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:5:22-78
+13
+14    <application
+14-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:7:5-56:19
+15        android:allowBackup="true"
+15-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:8:9-35
+16        android:debuggable="true"
+17        android:icon="@drawable/ic_launcher"
+17-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:9:9-45
+18        android:label="@string/app_name"
+18-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:10:9-41
+19        android:theme="@style/AppTheme_Light" >
+19-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:11:9-46
+20        <activity
+20-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:13:9-29:20
+21            android:name="org.freesong.MainActivity"
+21-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:14:13-41
+22            android:exported="true"
+22-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:16:13-36
+23            android:label="@string/app_name" >
+23-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:15:13-45
+24            <intent-filter>
+24-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:17:13-20:29
+25                <action android:name="android.intent.action.MAIN" />
+25-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:18:17-69
+25-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:18:25-66
+26
+27                <category android:name="android.intent.category.LAUNCHER" />
+27-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:19:17-77
+27-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:19:27-74
+28            </intent-filter>
+29            <intent-filter>
+29-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:21:13-28:29
+30                <action android:name="android.intent.action.VIEW" />
+30-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:22:17-69
+30-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:22:25-66
+31
+32                <category android:name="android.intent.category.DEFAULT" />
+32-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:23:17-76
+32-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:23:27-73
+33
+34                <data android:mimeType="text/*" />
+34-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:24:17-51
+34-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:24:23-48
+35                <data android:pathPattern=".*\\.onsong" />
+35-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:24:17-51
+35-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:25:23-56
+36                <data android:pathPattern=".*\\.chordpro" />
+36-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:24:17-51
+36-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:25:23-56
+37                <data android:pathPattern=".*\\.cho" />
+37-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:24:17-51
+37-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:25:23-56
+38            </intent-filter>
+39        </activity>
+40        <activity
+40-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:31:9-34:64
+41            android:name="org.freesong.SongViewActivity"
 41-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:32:13-45
-42            android:theme="@style/AppTheme_Light_Fullscreen" />
-42-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:33:13-61
-43        <activity
-43-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:35:9-37:40
-44            android:name="org.freesong.SetListsActivity"
-44-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:36:13-45
-45            android:label="Setlists" />
-45-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:37:13-37
-46        <activity
-46-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:39:9-41:39
-47            android:name="org.freesong.SetListViewActivity"
-47-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:40:13-48
-48            android:label="Setlist" />
-48-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:41:13-36
-49        <activity
-49-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:43:9-45:41
-50            android:name="org.freesong.SongPickerActivity"
-50-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:44:13-47
-51            android:label="Add Songs" />
-51-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:45:13-38
-52        <activity
-52-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:47:9-49:38
-53            android:name="org.freesong.FileBrowserActivity"
-53-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:48:13-48
-54            android:label="Import" />
-54-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:49:13-35
-55    </application>
-56
-57</manifest>
+42            android:label="@string/app_name"
+42-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:33:13-45
+43            android:theme="@style/AppTheme_Light_Fullscreen" />
+43-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:34:13-61
+44        <activity
+44-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:36:9-38:40
+45            android:name="org.freesong.SetListsActivity"
+45-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:37:13-45
+46            android:label="Setlists" />
+46-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:38:13-37
+47        <activity
+47-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:40:9-42:39
+48            android:name="org.freesong.SetListViewActivity"
+48-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:41:13-48
+49            android:label="Setlist" />
+49-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:42:13-36
+50        <activity
+50-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:44:9-46:41
+51            android:name="org.freesong.SongPickerActivity"
+51-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:45:13-47
+52            android:label="Add Songs" />
+52-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:46:13-38
+53        <activity
+53-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:48:9-50:38
+54            android:name="org.freesong.FileBrowserActivity"
+54-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:49:13-48
+55            android:label="Import" />
+55-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:50:13-35
+56        <activity
+56-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:52:9-54:41
+57            android:name="org.freesong.SongEditActivity"
+57-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:53:13-45
+58            android:label="Edit Song" />
+58-->/home/hkr/repositories/FreeSong/app/src/main/AndroidManifest.xml:54:13-38
+59    </application>
+60
+61</manifest>

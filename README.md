@@ -53,6 +53,23 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 2. Supported locations: `/sdcard/FreeSong/`, `/sdcard/OnSong/`, `/sdcard/Download/`
 3. Or use the **Import** button to import from OnSong backup files
 
+### Importing from OnSong
+
+FreeSong can import songs from OnSong backup files (`.backup`, `.zip`), including songs stored in the OnSong SQLite database.
+
+**Important for Android 4.4 users:** OnSong creates backups using ZIP format version 4.5, which is not fully compatible with Android 4.4. If you get an error like "cannot read local header", you need to repack the backup on a PC:
+
+```bash
+# On Linux/Mac:
+mkdir onsong_temp && cd onsong_temp
+unzip /path/to/OnSong.backup "*.txt" "*.onsong" "*.chordpro" "*.cho" "OnSong.sqlite3"
+zip -1 ../OnSong_compat.backup *
+
+# Then transfer OnSong_compat.backup to your device
+```
+
+This creates a compatible ZIP (version 2.0) that works on older Android devices.
+
 ### Viewing Songs
 - Tap a song in the library to open it
 - Long-press for song info and options to add to setlist

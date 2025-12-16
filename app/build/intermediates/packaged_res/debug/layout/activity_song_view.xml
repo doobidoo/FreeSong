@@ -1,39 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:orientation="vertical">
 
     <!-- Header -->
     <LinearLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp"
-        android:background="#F5F5F5">
+        android:padding="12dp">
 
         <TextView
             android:id="@+id/titleText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="#333333" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/artistText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#666666" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/keyText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textColor="#0066CC"
             android:textStyle="bold"
             android:visibility="gone" />
 
@@ -41,11 +38,11 @@
 
     <!-- Control Bar -->
     <LinearLayout
+        android:id="@+id/controlBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="8dp"
-        android:background="#EEEEEE"
         android:gravity="center_vertical">
 
         <Button
@@ -56,6 +53,7 @@
             android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/keyLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Key"
@@ -71,7 +69,7 @@
             android:textSize="18sp" />
 
         <View
-            android:layout_width="16dp"
+            android:layout_width="8dp"
             android:layout_height="1dp" />
 
         <Button
@@ -94,26 +92,49 @@
             android:layout_weight="1" />
 
         <Button
+            android:id="@+id/scrollBarBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="▼"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/editBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Edit"
+            android:textSize="14sp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp" />
+
+        <Button
             android:id="@+id/autoScrollBtn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:text="Scroll"
             android:textSize="14sp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp" />
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp" />
+
+        <Button
+            android:id="@+id/themeBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
-    <!-- Speed Control (hidden by default, shown when scrolling) -->
+    <!-- Speed Control -->
     <LinearLayout
+        android:id="@+id/speedBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="8dp"
-        android:background="#E0E0E0"
         android:gravity="center_vertical">
 
         <TextView
+            android:id="@+id/speedLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Speed:"
@@ -142,7 +163,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:textColor="#333333"
             android:lineSpacingMultiplier="1.2"
             android:fontFamily="monospace" />
 

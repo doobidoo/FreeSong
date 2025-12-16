@@ -212,9 +212,13 @@ public class FileBrowserActivity extends Activity {
 
     private void importBackupFile(final File file) {
         final ProgressDialog progress = new ProgressDialog(this);
-        progress.setMessage("Importing songs...");
+        progress.setMessage("Importing songs...\nThis may take a while for large backups.");
         progress.setCancelable(false);
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress.show();
+
+        // Keep screen on during import
+        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         new AsyncTask<Void, Void, BackupImporter.ImportResult>() {
             private Exception error;
@@ -232,6 +236,8 @@ public class FileBrowserActivity extends Activity {
             @Override
             protected void onPostExecute(BackupImporter.ImportResult result) {
                 progress.dismiss();
+                // Allow screen to turn off again
+                getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
                 if (error != null) {
                     Toast.makeText(FileBrowserActivity.this,

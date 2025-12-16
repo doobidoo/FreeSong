@@ -47,6 +47,7 @@ public class MainActivity extends Activity {
     private List<File> allSongFiles = new ArrayList<File>();
     private List<File> filteredSongFiles = new ArrayList<File>();
     private Map<File, String> songTitles = new HashMap<File, String>();
+    private Map<File, String> songArtists = new HashMap<File, String>();
     private ArrayAdapter<String> adapter;
 
     @Override
@@ -205,7 +206,7 @@ public class MainActivity extends Activity {
                 if (files != null) {
                     for (File file : files) {
                         allSongFiles.add(file);
-                        songTitles.put(file, getSongTitle(file));
+                        loadSongInfo(file);
                     }
                 }
             }
@@ -225,23 +226,27 @@ public class MainActivity extends Activity {
         filterSongs(searchField.getText().toString());
     }
 
-    private String getSongTitle(File file) {
+    private void loadSongInfo(File file) {
+        String title = null;
+        String artist = "";
         try {
             Song song = SongParser.parseFile(file);
-            String title = song.getTitle();
-            if (title != null && !title.isEmpty()) {
-                return title;
-            }
+            title = song.getTitle();
+            artist = song.getArtist();
         } catch (Exception e) {
             // Fall back to filename
         }
-        // Use filename without extension as fallback
-        String name = file.getName();
-        int dotIndex = name.lastIndexOf('.');
-        if (dotIndex > 0) {
-            name = name.substring(0, dotIndex);
+        // Use filename without extension as fallback for title
+        if (title == null || title.isEmpty()) {
+            String name = file.getName();
+            int dotIndex = name.lastIndexOf('.');
+            if (dotIndex > 0) {
+                name = name.substring(0, dotIndex);
+            }
+            title = name;
         }
-        return name;
+        songTitles.put(file, title);
+        songArtists.put(file, artist != null ? artist : "");
     }
 
     private void filterSongs(String query) {
@@ -252,13 +257,25 @@ public class MainActivity extends Activity {
 
         for (File file : allSongFiles) {
             String title = songTitles.get(file);
+            String artist = songArtists.get(file);
             if (title == null) {
                 title = file.getName();
             }
+            if (artist == null) {
+                artist = "";
+            }
 
-            if (lowerQuery.isEmpty() || title.toLowerCase().contains(lowerQuery)) {
+            // Search in both title and artist
+            if (lowerQuery.isEmpty() ||
+                title.toLowerCase().contains(lowerQuery) ||
+                artist.toLowerCase().contains(lowerQuery)) {
                 filteredSongFiles.add(file);
-                adapter.add(title);
+                // Show artist in list if available
+                if (!artist.isEmpty()) {
+                    adapter.add(title + " - " + artist);
+                } else {
+                    adapter.add(title);
+                }
             }
         }
 

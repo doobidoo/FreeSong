@@ -5,6 +5,16 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-12-16
+
+### Added
+- **Artist Search**: Search now finds songs by artist name, not just title
+- **Artist Display**: Song list shows "Title - Artist" format when artist is available
+- **ZIP Compatibility Docs**: Added documentation for OnSong backup conversion on Android 4.4
+
+### Fixed
+- **Import Screen**: Screen now stays on during long imports (prevents timeout)
+
 ## [1.1.0] - 2025-12-16
 
 ### Added
