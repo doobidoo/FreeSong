@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -172,58 +173,76 @@ public class MainActivity extends Activity {
     }
 
     private void loadSongs() {
-        allSongFiles.clear();
-        songTitles.clear();
+        // Show loading indicator
+        emptyText.setText("Loading songs...");
+        emptyText.setVisibility(View.VISIBLE);
+        songListView.setVisibility(View.GONE);
 
-        // Look for songs in FreeSong folder on external storage
-        File freeSongDir = new File(Environment.getExternalStorageDirectory(), "FreeSong");
-        if (!freeSongDir.exists()) {
-            freeSongDir.mkdirs();
-        }
-
-        // Also check common OnSong locations
-        List<File> searchDirs = new ArrayList<File>();
-        searchDirs.add(freeSongDir);
-        searchDirs.add(new File(Environment.getExternalStorageDirectory(), "OnSong"));
-        searchDirs.add(new File(Environment.getExternalStorageDirectory(), "Download"));
-
-        FilenameFilter songFilter = new FilenameFilter() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
-            public boolean accept(File dir, String filename) {
-                String lower = filename.toLowerCase();
-                return lower.endsWith(".onsong") ||
-                       lower.endsWith(".chordpro") ||
-                       lower.endsWith(".cho") ||
-                       lower.endsWith(".crd") ||
-                       lower.endsWith(".pro") ||
-                       lower.endsWith(".txt");
-            }
-        };
+            protected Void doInBackground(Void... params) {
+                allSongFiles.clear();
+                songTitles.clear();
+                songArtists.clear();
 
-        for (File dir : searchDirs) {
-            if (dir.exists() && dir.isDirectory()) {
-                File[] files = dir.listFiles(songFilter);
-                if (files != null) {
-                    for (File file : files) {
-                        allSongFiles.add(file);
-                        loadSongInfo(file);
+                // Look for songs in FreeSong folder on external storage
+                File freeSongDir = new File(Environment.getExternalStorageDirectory(), "FreeSong");
+                if (!freeSongDir.exists()) {
+                    freeSongDir.mkdirs();
+                }
+
+                // Also check common OnSong locations
+                List<File> searchDirs = new ArrayList<File>();
+                searchDirs.add(freeSongDir);
+                searchDirs.add(new File(Environment.getExternalStorageDirectory(), "OnSong"));
+                searchDirs.add(new File(Environment.getExternalStorageDirectory(), "Download"));
+
+                FilenameFilter songFilter = new FilenameFilter() {
+                    @Override
+                    public boolean accept(File dir, String filename) {
+                        String lower = filename.toLowerCase();
+                        return lower.endsWith(".onsong") ||
+                               lower.endsWith(".chordpro") ||
+                               lower.endsWith(".cho") ||
+                               lower.endsWith(".crd") ||
+                               lower.endsWith(".pro") ||
+                               lower.endsWith(".txt");
+                    }
+                };
+
+                for (File dir : searchDirs) {
+                    if (dir.exists() && dir.isDirectory()) {
+                        File[] files = dir.listFiles(songFilter);
+                        if (files != null) {
+                            for (File file : files) {
+                                allSongFiles.add(file);
+                                loadSongInfo(file);
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        // Sort by song title
-        Collections.sort(allSongFiles, new Comparator<File>() {
+                // Sort by song title
+                Collections.sort(allSongFiles, new Comparator<File>() {
+                    @Override
+                    public int compare(File f1, File f2) {
+                        String t1 = songTitles.get(f1);
+                        String t2 = songTitles.get(f2);
+                        if (t1 == null) t1 = "";
+                        if (t2 == null) t2 = "";
+                        return t1.compareToIgnoreCase(t2);
+                    }
+                });
+
+                return null;
+            }
+
             @Override
-            public int compare(File f1, File f2) {
-                String t1 = songTitles.get(f1);
-                String t2 = songTitles.get(f2);
-                return t1.compareToIgnoreCase(t2);
+            protected void onPostExecute(Void result) {
+                // Apply current filter on UI thread
+                filterSongs(searchField.getText().toString());
             }
-        });
-
-        // Apply current filter
-        filterSongs(searchField.getText().toString());
+        }.execute();
     }
 
     private void loadSongInfo(File file) {
