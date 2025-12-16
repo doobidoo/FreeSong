@@ -50,6 +50,7 @@ public class MainActivity extends Activity {
     private Map<File, String> songTitles = new HashMap<File, String>();
     private Map<File, String> songArtists = new HashMap<File, String>();
     private ArrayAdapter<String> adapter;
+    private boolean songsLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +110,55 @@ public class MainActivity extends Activity {
 
         setupSongList();
         updateThemeButton();
+
+        // Restore state if available (e.g., after theme change)
+        if (savedInstanceState != null && savedInstanceState.getBoolean("songsLoaded", false)) {
+            restoreSongList(savedInstanceState);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (!allSongFiles.isEmpty()) {
+            ArrayList<String> paths = new ArrayList<String>();
+            ArrayList<String> titles = new ArrayList<String>();
+            ArrayList<String> artists = new ArrayList<String>();
+            for (File f : allSongFiles) {
+                paths.add(f.getAbsolutePath());
+                titles.add(songTitles.get(f));
+                artists.add(songArtists.get(f));
+            }
+            outState.putStringArrayList("songPaths", paths);
+            outState.putStringArrayList("songTitles", titles);
+            outState.putStringArrayList("songArtists", artists);
+            outState.putBoolean("songsLoaded", true);
+            outState.putString("searchQuery", searchField.getText().toString());
+        }
+    }
+
+    private void restoreSongList(Bundle savedState) {
+        ArrayList<String> paths = savedState.getStringArrayList("songPaths");
+        ArrayList<String> titles = savedState.getStringArrayList("songTitles");
+        ArrayList<String> artists = savedState.getStringArrayList("songArtists");
+        String searchQuery = savedState.getString("searchQuery", "");
+
+        if (paths != null && titles != null && artists != null) {
+            allSongFiles.clear();
+            songTitles.clear();
+            songArtists.clear();
+
+            for (int i = 0; i < paths.size(); i++) {
+                File file = new File(paths.get(i));
+                allSongFiles.add(file);
+                songTitles.put(file, titles.get(i));
+                songArtists.put(file, artists.get(i));
+            }
+
+            songsLoaded = true;
+            searchField.setText(searchQuery);
+            filterSongs(searchQuery);
+        }
     }
 
     private void updateThemeButton() {
@@ -149,8 +199,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Only reload if list is empty (first load or after import)
-        if (allSongFiles.isEmpty()) {
+        // Only reload if list is empty and not restored from saved state
+        if (allSongFiles.isEmpty() && !songsLoaded) {
             loadSongs();
         }
     }
@@ -263,6 +313,7 @@ public class MainActivity extends Activity {
 
             @Override
             protected void onPostExecute(Void result) {
+                songsLoaded = true;
                 // Apply current filter on UI thread
                 filterSongs(searchField.getText().toString());
             }
@@ -353,6 +404,15 @@ public class MainActivity extends Activity {
     private void openSong(File file) {
         Intent intent = new Intent(this, SongViewActivity.class);
         intent.putExtra("songPath", file.getAbsolutePath());
+
+        // Pass filtered list for swipe navigation between songs
+        ArrayList<String> songPaths = new ArrayList<String>();
+        for (File f : filteredSongFiles) {
+            songPaths.add(f.getAbsolutePath());
+        }
+        intent.putStringArrayListExtra("setlistPaths", songPaths);
+        intent.putExtra("currentIndex", filteredSongFiles.indexOf(file));
+
         startActivity(intent);
     }
 

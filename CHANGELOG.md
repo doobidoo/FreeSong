@@ -5,6 +5,19 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-12-16
+
+### Added
+- **Swipe Navigation in Library**: Swipe left/right to navigate between songs when viewing from the main library (not just setlists)
+- **Chord Format Toggle in Editor**: New "Above"/"Inline" button converts between chord formats:
+  - Inline chords: `[G]Amazing [D]grace` (ChordPro style)
+  - Chords above lyrics: Chords on separate line above lyrics (OnSong style)
+  - Auto-detects current format when opening a song
+
+### Fixed
+- **Theme Toggle Performance**: Switching dark/light mode no longer resets song loading - library state is preserved
+- **Chord Alignment**: Fixed chord positioning when long chords (e.g., "Am7/B") overlap with subsequent chord positions
+
 ## [1.5.0] - 2025-12-16
 
 ### Added

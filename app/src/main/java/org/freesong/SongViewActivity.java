@@ -345,10 +345,17 @@ public class SongViewActivity extends Activity {
                 // Build chord line
                 if (!line.getChords().isEmpty()) {
                     StringBuilder chordLine = new StringBuilder();
-                    int lastPos = 0;
                     for (Song.ChordPosition cp : line.getChords()) {
-                        // Pad with spaces to reach position
-                        while (chordLine.length() < cp.getPosition()) {
+                        int targetPos = cp.getPosition();
+                        int currentLen = chordLine.length();
+
+                        if (currentLen < targetPos) {
+                            // Pad with spaces to reach target position
+                            while (chordLine.length() < targetPos) {
+                                chordLine.append(" ");
+                            }
+                        } else if (currentLen > targetPos) {
+                            // Previous chord overlaps - add single space separator
                             chordLine.append(" ");
                         }
                         chordLine.append(cp.getChord());

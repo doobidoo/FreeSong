@@ -31,8 +31,10 @@ public class SongEditActivity extends Activity {
     private Button cancelBtn;
     private Button saveBtn;
     private Button themeBtn;
+    private Button formatBtn;
     private String songPath;
     private String originalContent;
+    private boolean isInlineMode = true; // Track current format (inline = ChordPro style)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +49,17 @@ public class SongEditActivity extends Activity {
         cancelBtn = (Button) findViewById(R.id.cancelBtn);
         saveBtn = (Button) findViewById(R.id.saveBtn);
         themeBtn = (Button) findViewById(R.id.themeBtn);
+        formatBtn = (Button) findViewById(R.id.formatBtn);
 
         applyThemeColors();
         updateThemeButton();
+
+        formatBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleChordFormat();
+            }
+        });
 
         themeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,9 +135,45 @@ public class SongEditActivity extends Activity {
 
             originalContent = content.toString();
             songEditor.setText(originalContent);
+
+            // Detect initial format and update button
+            isInlineMode = ChordFormatConverter.isInlineFormat(originalContent);
+            updateFormatButton();
         } catch (Exception e) {
             Toast.makeText(this, "Error loading song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
+        }
+    }
+
+    private void toggleChordFormat() {
+        String content = songEditor.getText().toString();
+        String converted;
+
+        // Save cursor position
+        int cursorPos = songEditor.getSelectionStart();
+
+        if (isInlineMode) {
+            // Convert inline -> above
+            converted = ChordFormatConverter.inlineToAbove(content);
+            isInlineMode = false;
+        } else {
+            // Convert above -> inline
+            converted = ChordFormatConverter.aboveToInline(content);
+            isInlineMode = true;
+        }
+
+        songEditor.setText(converted);
+        // Restore cursor position (approximately)
+        songEditor.setSelection(Math.min(cursorPos, converted.length()));
+        updateFormatButton();
+    }
+
+    private void updateFormatButton() {
+        // Button shows what you'll convert TO when clicked
+        if (isInlineMode) {
+            formatBtn.setText("Above");
+        } else {
+            formatBtn.setText("Inline");
         }
     }
 

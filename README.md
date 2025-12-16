@@ -19,7 +19,8 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 - **Dark/Light Theme**: Toggle between dark and light modes for different lighting conditions
 - **Setlist Management**: Create and organize setlists for performances
 - **Song Editor**: Edit song files directly within the app
-- **Swipe Navigation**: Navigate between songs in a setlist with swipe gestures or edge taps
+- **Chord Format Converter**: Toggle between inline chords `[G]lyrics` and chords-above-lyrics format while editing
+- **Swipe Navigation**: Navigate between songs with swipe gestures or edge taps (works in library and setlists)
 - **OnSong Backup Import**: Import songs directly from OnSong backup files (.backup, .zip)
 - **Screen Always On**: Prevents screen from dimming during song viewing
 
@@ -75,6 +76,7 @@ This creates a compatible ZIP (version 2.0) that works on older Android devices.
 ### Viewing Songs
 - Tap a song in the library to open it
 - Long-press for options: **Open**, **Add to Setlist**, or **Delete**
+- **Swipe left/right** or tap screen edges to navigate between songs
 - Use the control bar to transpose, adjust font size, or enable auto-scroll
 - Double-tap to toggle auto-scroll
 - Use the ▼/▲ button to show/hide the speed control bar
@@ -90,6 +92,9 @@ This creates a compatible ZIP (version 2.0) that works on older Android devices.
 
 ### Editing Songs
 - Tap **Edit** while viewing a song to open the editor
+- Use the **Above/Inline** button to convert between chord formats:
+  - **Inline**: `[G]Amazing [D]grace` (ChordPro style)
+  - **Above**: Chords on separate line above lyrics (OnSong style)
 - Make changes and tap **Save**
 - Press **Cancel** or back to discard changes
 
