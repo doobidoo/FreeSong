@@ -55,7 +55,9 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 
 ### Importing from OnSong
 
-FreeSong can import songs from OnSong backup files (`.backup`, `.zip`), including songs stored in the OnSong SQLite database.
+FreeSong can import songs and setlists from OnSong backup files (`.backup`, `.zip`):
+- **Songs**: Extracts all songs from the OnSong SQLite database (not just loose files)
+- **Setlists**: Automatically imports your setlists and matches songs by title
 
 **Important for Android 4.4 users:** OnSong creates backups using ZIP format version 4.5, which is not fully compatible with Android 4.4. If you get an error like "cannot read local header", you need to repack the backup on a PC:
 
@@ -72,10 +74,11 @@ This creates a compatible ZIP (version 2.0) that works on older Android devices.
 
 ### Viewing Songs
 - Tap a song in the library to open it
-- Long-press for song info and options to add to setlist
+- Long-press for options: **Open**, **Add to Setlist**, or **Delete**
 - Use the control bar to transpose, adjust font size, or enable auto-scroll
 - Double-tap to toggle auto-scroll
 - Use the ▼/▲ button to show/hide the speed control bar
+- Search finds songs by **title** or **artist name**
 
 ### Setlists
 - Tap **Sets** to manage your setlists
@@ -83,6 +86,7 @@ This creates a compatible ZIP (version 2.0) that works on older Android devices.
 - Add songs from the library using long-press > "Add to Setlist"
 - Reorder songs by dragging
 - When viewing songs from a setlist, swipe left/right or tap screen edges to navigate
+- **Import setlists from OnSong**: Setlists are automatically imported from OnSong backups
 
 ### Editing Songs
 - Tap **Edit** while viewing a song to open the editor
