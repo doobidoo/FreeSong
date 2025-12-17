@@ -36,6 +36,7 @@ public class SetListDbHelper extends SQLiteOpenHelper {
     private static final String COL_NOTES = "notes";
 
     private static SetListDbHelper instance;
+    private Context appContext;
 
     public static synchronized SetListDbHelper getInstance(Context context) {
         if (instance == null) {
@@ -46,6 +47,21 @@ public class SetListDbHelper extends SQLiteOpenHelper {
 
     private SetListDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.appContext = context.getApplicationContext();
+    }
+
+    /**
+     * Trigger auto-backup of setlists to external storage.
+     * Called automatically after any setlist modification.
+     */
+    private void triggerAutoBackup() {
+        // Run backup in background thread to not block UI
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SetlistBackupManager.exportSetlists(appContext);
+            }
+        }).start();
     }
 
     @Override
@@ -94,6 +110,7 @@ public class SetListDbHelper extends SQLiteOpenHelper {
 
         long id = db.insert(TABLE_SETLISTS, null, values);
         setList.setId(id);
+        triggerAutoBackup();
         return id;
     }
 
@@ -105,6 +122,7 @@ public class SetListDbHelper extends SQLiteOpenHelper {
 
         db.update(TABLE_SETLISTS, values, COL_ID + " = ?",
             new String[]{String.valueOf(setList.getId())});
+        triggerAutoBackup();
     }
 
     public void deleteSetList(long setListId) {
@@ -113,6 +131,7 @@ public class SetListDbHelper extends SQLiteOpenHelper {
             new String[]{String.valueOf(setListId)});
         db.delete(TABLE_SETLISTS, COL_ID + " = ?",
             new String[]{String.valueOf(setListId)});
+        triggerAutoBackup();
     }
 
     public SetList getSetList(long id) {
@@ -185,6 +204,7 @@ public class SetListDbHelper extends SQLiteOpenHelper {
 
         // Update setlist modified time
         updateSetListModifiedTime(setListId);
+        triggerAutoBackup();
 
         return id;
     }
@@ -208,6 +228,7 @@ public class SetListDbHelper extends SQLiteOpenHelper {
         if (setListId != -1) {
             reorderSetListItems(setListId);
             updateSetListModifiedTime(setListId);
+            triggerAutoBackup();
         }
     }
 
@@ -290,6 +311,7 @@ public class SetListDbHelper extends SQLiteOpenHelper {
         }
 
         updateSetListModifiedTime(setListId);
+        triggerAutoBackup();
     }
 
     /**
@@ -319,6 +341,10 @@ public class SetListDbHelper extends SQLiteOpenHelper {
         for (Long setListId : affectedSetLists) {
             reorderSetListItems(setListId);
             updateSetListModifiedTime(setListId);
+        }
+
+        if (deleted > 0) {
+            triggerAutoBackup();
         }
 
         return deleted;

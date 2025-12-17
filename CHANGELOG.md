@@ -5,6 +5,17 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2025-12-17
+
+### Added
+- **Setlist Auto-Backup**: Setlists are automatically saved to `FreeSong/setlists-backup.json` after every change
+- **Setlist Export/Import**: Manual export and import buttons in Setlists screen
+- **Auto-Restore**: When app is reinstalled and DB is empty, offers to restore from backup
+- **Backup survives reinstall**: Setlist backup file is stored in FreeSong folder, not app data
+
+### Fixed
+- Setlists no longer lost when app is uninstalled and reinstalled
+
 ## [1.7.0] - 2025-12-17
 
 ### Added

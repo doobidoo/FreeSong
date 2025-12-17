@@ -18,6 +18,7 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 - **Font Size Control**: Increase or decrease text size for readability
 - **Dark/Light Theme**: Toggle between dark and light modes for different lighting conditions
 - **Setlist Management**: Create and organize setlists for performances
+- **Setlist Backup**: Auto-backup to FreeSong folder, survives app reinstall
 - **Song Editor**: Edit song files directly within the app
 - **Chord Format Converter**: Toggle between inline chords `[G]lyrics` and chords-above-lyrics format while editing
 - **Flat/Sharp Converter**: Toggle between sharp (#) and flat (b) chord notation with intelligent enharmonic conversion

@@ -31,10 +31,13 @@ public class SetListsActivity extends Activity {
     private TextView emptyText;
     private Button newSetlistBtn;
     private Button themeBtn;
+    private Button exportBtn;
+    private Button importBtn;
 
     private List<SetList> setLists = new ArrayList<SetList>();
     private SetListAdapter adapter;
     private SetListDbHelper dbHelper;
+    private boolean checkedForRestore = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +85,23 @@ public class SetListsActivity extends Activity {
                 showCreateSetListDialog();
             }
         });
+
+        exportBtn = (Button) findViewById(R.id.exportBtn);
+        importBtn = (Button) findViewById(R.id.importBtn);
+
+        exportBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exportSetlists();
+            }
+        });
+
+        importBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showImportDialog();
+            }
+        });
     }
 
     @Override
@@ -92,6 +112,15 @@ public class SetListsActivity extends Activity {
 
     private void loadSetLists() {
         setLists = dbHelper.getAllSetLists();
+
+        // Check for auto-restore on first load if DB is empty
+        if (!checkedForRestore && setLists.isEmpty() && SetlistBackupManager.backupExists()) {
+            checkedForRestore = true;
+            showAutoRestoreDialog();
+            return;
+        }
+        checkedForRestore = true;
+
         adapter.notifyDataSetChanged();
 
         if (setLists.isEmpty()) {
@@ -101,6 +130,86 @@ public class SetListsActivity extends Activity {
             emptyText.setVisibility(View.GONE);
             setlistListView.setVisibility(View.VISIBLE);
         }
+
+        // Update import button text based on backup availability
+        if (SetlistBackupManager.backupExists()) {
+            String info = SetlistBackupManager.getBackupInfo();
+            importBtn.setText("Import (" + info + ")");
+        } else {
+            importBtn.setText("Import");
+        }
+    }
+
+    private void showAutoRestoreDialog() {
+        String info = SetlistBackupManager.getBackupInfo();
+        new AlertDialog.Builder(this)
+            .setTitle("Restore Setlists?")
+            .setMessage("A backup was found:\n" + info + "\n\nRestore setlists from backup?")
+            .setPositiveButton("Restore", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    int restored = SetlistBackupManager.importSetlists(SetListsActivity.this, false);
+                    if (restored > 0) {
+                        Toast.makeText(SetListsActivity.this,
+                            "Restored " + restored + " setlist(s)", Toast.LENGTH_SHORT).show();
+                    }
+                    loadSetLists();
+                }
+            })
+            .setNegativeButton("Skip", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    loadSetLists();
+                }
+            })
+            .setCancelable(false)
+            .show();
+    }
+
+    private void exportSetlists() {
+        if (setLists.isEmpty()) {
+            Toast.makeText(this, "No setlists to export", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        boolean success = SetlistBackupManager.exportSetlists(this);
+        if (success) {
+            Toast.makeText(this, "Exported " + setLists.size() + " setlist(s) to FreeSong folder",
+                Toast.LENGTH_SHORT).show();
+            loadSetLists(); // Refresh import button text
+        } else {
+            Toast.makeText(this, "Export failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showImportDialog() {
+        if (!SetlistBackupManager.backupExists()) {
+            Toast.makeText(this, "No backup file found in FreeSong folder", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String info = SetlistBackupManager.getBackupInfo();
+        String[] options = {"Import (skip existing)", "Import (replace existing)"};
+
+        new AlertDialog.Builder(this)
+            .setTitle("Import Setlists")
+            .setMessage("Backup: " + info)
+            .setItems(options, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    boolean merge = (which == 1);
+                    int imported = SetlistBackupManager.importSetlists(SetListsActivity.this, merge);
+                    if (imported >= 0) {
+                        Toast.makeText(SetListsActivity.this,
+                            "Imported " + imported + " setlist(s)", Toast.LENGTH_SHORT).show();
+                        loadSetLists();
+                    } else {
+                        Toast.makeText(SetListsActivity.this, "Import failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 
     private void openSetList(SetList setList) {
