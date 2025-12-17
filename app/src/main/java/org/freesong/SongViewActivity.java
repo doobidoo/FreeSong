@@ -1,8 +1,11 @@
 package org.freesong;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.view.KeyEvent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.SpannableStringBuilder;
@@ -37,6 +40,7 @@ public class SongViewActivity extends Activity {
     private int scrollSpeed = 50; // pixels per second
     private float fontSize = 18f;
     private boolean speedBarVisible = true;
+    private String pageTurnerMode = "scroll"; // "scroll" or "navigate"
 
     // Setlist navigation support
     private ArrayList<String> setlistPaths;
@@ -63,6 +67,7 @@ public class SongViewActivity extends Activity {
     private Button fontDownBtn;
     private Button scrollBarBtn;
     private Button themeBtn;
+    private Button pedalBtn;
     private SeekBar speedSeekBar;
 
     private Handler scrollHandler = new Handler();
@@ -91,6 +96,9 @@ public class SongViewActivity extends Activity {
 
         // Restore speed bar visibility from preferences (persists across app exits)
         speedBarVisible = ThemeManager.isSpeedBarVisible(this);
+
+        // Load page turner mode from preferences
+        pageTurnerMode = ThemeManager.getPageTurnerMode(this);
 
         // Keep screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -156,6 +164,7 @@ public class SongViewActivity extends Activity {
         fontDownBtn = (Button) findViewById(R.id.fontDownBtn);
         scrollBarBtn = (Button) findViewById(R.id.scrollBarBtn);
         themeBtn = (Button) findViewById(R.id.themeBtn);
+        pedalBtn = (Button) findViewById(R.id.pedalBtn);
         speedSeekBar = (SeekBar) findViewById(R.id.speedSeekBar);
 
         transposeUpBtn.setOnClickListener(new View.OnClickListener() {
@@ -211,6 +220,13 @@ public class SongViewActivity extends Activity {
             @Override
             public void onClick(View v) {
                 toggleTheme();
+            }
+        });
+
+        pedalBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPageTurnerSettings();
             }
         });
 
@@ -577,5 +593,218 @@ public class SongViewActivity extends Activity {
         outState.putFloat("fontSize", fontSize);
         outState.putInt("scrollSpeed", scrollSpeed);
         outState.putInt("scrollPosition", scrollView.getScrollY());
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        // Only handle key down events
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            int keyCode = event.getKeyCode();
+
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_PAGE_DOWN:
+                case KeyEvent.KEYCODE_DPAD_DOWN:
+                case KeyEvent.KEYCODE_SPACE:
+                case KeyEvent.KEYCODE_ENTER:
+                    handlePageTurnerDown();
+                    return true;
+
+                case KeyEvent.KEYCODE_PAGE_UP:
+                case KeyEvent.KEYCODE_DPAD_UP:
+                case KeyEvent.KEYCODE_DEL:
+                    handlePageTurnerUp();
+                    return true;
+            }
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
+    // CubeTurner sends touch/swipe events instead of key events
+    // In landscape mode it uses ABS_X, in portrait mode it uses ABS_Y
+    private float cubeTurnerFirstX = -1;
+    private float cubeTurnerFirstY = -1;
+    private float cubeTurnerLastX = -1;
+    private float cubeTurnerLastY = -1;
+    private boolean cubeTurnerActive = false;
+
+    // Smart mode: track if we're at the end and waiting for confirmation
+    private boolean waitingForNextSong = false;
+    private boolean waitingForPrevSong = false;
+
+    @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        // Check if this is from an external device (like CubeTurner)
+        if (event.getSource() != 0) {
+            int action = event.getActionMasked();
+            float x = event.getX();
+            float y = event.getY();
+
+            if (action == MotionEvent.ACTION_DOWN ||
+                (action == MotionEvent.ACTION_MOVE && !cubeTurnerActive)) {
+                // Start tracking both axes
+                cubeTurnerFirstX = x;
+                cubeTurnerFirstY = y;
+                cubeTurnerActive = true;
+            }
+
+            if (action == MotionEvent.ACTION_MOVE) {
+                cubeTurnerLastX = x;
+                cubeTurnerLastY = y;
+            }
+
+            if (action == MotionEvent.ACTION_UP && cubeTurnerActive) {
+                float deltaX = cubeTurnerLastX - cubeTurnerFirstX;
+                float deltaY = cubeTurnerLastY - cubeTurnerFirstY;
+
+                // Reset
+                cubeTurnerActive = false;
+                cubeTurnerFirstX = -1;
+                cubeTurnerFirstY = -1;
+                cubeTurnerLastX = -1;
+                cubeTurnerLastY = -1;
+
+                // Use the axis with the larger movement (landscape=X, portrait=Y)
+                float delta = (Math.abs(deltaX) > Math.abs(deltaY)) ? deltaX : deltaY;
+
+                if (delta > 50) {
+                    // Positive delta = page down / next (right pedal)
+                    handlePageTurnerDown();
+                    return true;
+                } else if (delta < -50) {
+                    // Negative delta = page up / previous (left pedal)
+                    handlePageTurnerUp();
+                    return true;
+                }
+            }
+        }
+        return super.dispatchGenericMotionEvent(event);
+    }
+
+    private boolean isAtBottom() {
+        if (scrollView.getChildAt(0) == null) return false;
+        int diff = scrollView.getChildAt(0).getBottom() - (scrollView.getHeight() + scrollView.getScrollY());
+        return diff <= 10; // small tolerance
+    }
+
+    private boolean isAtTop() {
+        return scrollView.getScrollY() <= 10; // small tolerance
+    }
+
+    private void handlePageTurnerDown() {
+        waitingForPrevSong = false; // Reset opposite direction
+
+        if ("navigate".equals(pageTurnerMode)) {
+            // Navigate mode: directly go to next song
+            if (setlistPaths != null && currentIndex < setlistPaths.size() - 1) {
+                navigateNext();
+                Toast.makeText(this, "Nächster Song", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Letzter Song", Toast.LENGTH_SHORT).show();
+            }
+        } else if ("smart".equals(pageTurnerMode)) {
+            // Smart mode: scroll until end, then confirm, then next song
+            if (isAtBottom()) {
+                if (waitingForNextSong) {
+                    // Second press at bottom: go to next song
+                    if (setlistPaths != null && currentIndex < setlistPaths.size() - 1) {
+                        navigateNext();
+                        Toast.makeText(this, "Nächster Song", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Letzter Song erreicht", Toast.LENGTH_SHORT).show();
+                    }
+                    waitingForNextSong = false;
+                } else {
+                    // First press at bottom: show warning
+                    waitingForNextSong = true;
+                    Toast.makeText(this, "Ende - nochmal für nächsten Song", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                // Not at bottom: scroll down
+                int scrollAmount = scrollView.getHeight() - 100;
+                scrollView.smoothScrollBy(0, scrollAmount);
+                waitingForNextSong = false;
+                Toast.makeText(this, "Seite runter", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            // Scroll mode: just scroll down
+            int scrollAmount = scrollView.getHeight() - 100;
+            scrollView.smoothScrollBy(0, scrollAmount);
+            Toast.makeText(this, "Seite runter", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void handlePageTurnerUp() {
+        waitingForNextSong = false; // Reset opposite direction
+
+        if ("navigate".equals(pageTurnerMode)) {
+            // Navigate mode: directly go to previous song
+            if (setlistPaths != null && currentIndex > 0) {
+                navigatePrevious();
+                Toast.makeText(this, "Vorheriger Song", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Erster Song", Toast.LENGTH_SHORT).show();
+            }
+        } else if ("smart".equals(pageTurnerMode)) {
+            // Smart mode: scroll until top, then confirm, then previous song
+            if (isAtTop()) {
+                if (waitingForPrevSong) {
+                    // Second press at top: go to previous song
+                    if (setlistPaths != null && currentIndex > 0) {
+                        navigatePrevious();
+                        Toast.makeText(this, "Vorheriger Song", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Erster Song erreicht", Toast.LENGTH_SHORT).show();
+                    }
+                    waitingForPrevSong = false;
+                } else {
+                    // First press at top: show warning
+                    waitingForPrevSong = true;
+                    Toast.makeText(this, "Anfang - nochmal für vorherigen Song", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                // Not at top: scroll up
+                int scrollAmount = scrollView.getHeight() - 100;
+                scrollView.smoothScrollBy(0, -scrollAmount);
+                waitingForPrevSong = false;
+                Toast.makeText(this, "Seite hoch", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            // Scroll mode: just scroll up
+            int scrollAmount = scrollView.getHeight() - 100;
+            scrollView.smoothScrollBy(0, -scrollAmount);
+            Toast.makeText(this, "Seite hoch", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showPageTurnerSettings() {
+        final String[] options = {"Seite scrollen", "Song wechseln", "Smart (Scroll + Wechsel)"};
+        final String[] modes = {"scroll", "navigate", "smart"};
+
+        int currentSelection = 0;
+        for (int i = 0; i < modes.length; i++) {
+            if (modes[i].equals(pageTurnerMode)) {
+                currentSelection = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(this)
+            .setTitle("Fußpedal / Page Turner")
+            .setSingleChoiceItems(options, currentSelection, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    pageTurnerMode = modes[which];
+                    ThemeManager.setPageTurnerMode(SongViewActivity.this, pageTurnerMode);
+                    // Reset waiting states when mode changes
+                    waitingForNextSong = false;
+                    waitingForPrevSong = false;
+                    dialog.dismiss();
+                    Toast.makeText(SongViewActivity.this,
+                        "Pedal: " + options[which],
+                        Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("Abbrechen", null)
+            .show();
     }
 }

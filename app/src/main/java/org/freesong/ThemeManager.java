@@ -12,6 +12,7 @@ public class ThemeManager {
     private static final String PREFS_NAME = "FreeSongPrefs";
     private static final String KEY_DARK_MODE = "dark_mode";
     private static final String KEY_SPEED_BAR_VISIBLE = "speed_bar_visible";
+    private static final String KEY_PAGE_TURNER_MODE = "page_turner_mode";
 
     public static boolean isDarkMode(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -35,6 +36,22 @@ public class ThemeManager {
     public static void setSpeedBarVisible(Context context, boolean visible) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().putBoolean(KEY_SPEED_BAR_VISIBLE, visible).apply();
+    }
+
+    /**
+     * Get the page turner mode ("scroll" or "navigate").
+     */
+    public static String getPageTurnerMode(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(KEY_PAGE_TURNER_MODE, "scroll");
+    }
+
+    /**
+     * Set the page turner mode ("scroll" or "navigate").
+     */
+    public static void setPageTurnerMode(Context context, String mode) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putString(KEY_PAGE_TURNER_MODE, mode).apply();
     }
 
     /**
