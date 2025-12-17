@@ -20,6 +20,14 @@
             android:layout_height="40dp"
             android:text="Cancel" />
 
+        <Button
+            android:id="@+id/deleteBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Delete"
+            android:textColor="#FF5555"
+            android:textSize="12sp" />
+
         <TextView
             android:id="@+id/editTitleText"
             android:layout_width="0dp"
@@ -41,6 +49,15 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:text="Above"
+            android:textSize="12sp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp" />
+
+        <Button
+            android:id="@+id/accidentalBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="#/b"
             android:textSize="12sp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp" />

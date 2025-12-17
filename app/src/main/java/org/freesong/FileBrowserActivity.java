@@ -251,11 +251,23 @@ public class FileBrowserActivity extends Activity {
                 if (result.skippedFiles > 0) {
                     message.append("Songs skipped: ").append(result.skippedFiles).append(" (already exist)\n");
                 }
+                if (result.skippedBinary > 0) {
+                    message.append("Binary files skipped: ").append(result.skippedBinary).append("\n");
+                }
                 if (result.importedSetlists > 0) {
                     message.append("\nSetlists imported: ").append(result.importedSetlists).append("\n");
                 }
                 if (result.skippedSetlists > 0) {
                     message.append("Setlists skipped: ").append(result.skippedSetlists).append(" (already exist)\n");
+                }
+                if (!result.warnings.isEmpty()) {
+                    message.append("\nWarnings:\n");
+                    for (int i = 0; i < Math.min(result.warnings.size(), 5); i++) {
+                        message.append("- ").append(result.warnings.get(i)).append("\n");
+                    }
+                    if (result.warnings.size() > 5) {
+                        message.append("... and ").append(result.warnings.size() - 5).append(" more\n");
+                    }
                 }
                 if (!result.errors.isEmpty()) {
                     message.append("\nErrors: ").append(result.errors.size());
@@ -278,13 +290,13 @@ public class FileBrowserActivity extends Activity {
 
     private void importSingleFile(File file) {
         try {
-            boolean imported = BackupImporter.importSingleFile(file);
-            if (imported) {
+            BackupImporter.ImportSingleResult result = BackupImporter.importSingleFile(file);
+            if (result.success) {
                 Toast.makeText(this, "Imported: " + file.getName(), Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
                 finish();
             } else {
-                Toast.makeText(this, "File already exists or invalid", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, result.message, Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             Toast.makeText(this, "Import failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();

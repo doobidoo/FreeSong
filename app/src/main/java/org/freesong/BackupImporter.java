@@ -33,11 +33,18 @@ public class BackupImporter {
         public int totalFiles = 0;
         public int importedFiles = 0;
         public int skippedFiles = 0;
+        public int skippedBinary = 0;
         public int importedSetlists = 0;
         public int skippedSetlists = 0;
         public List<String> importedNames = new ArrayList<String>();
         public List<String> importedSetlistNames = new ArrayList<String>();
+        public List<String> warnings = new ArrayList<String>();
         public List<String> errors = new ArrayList<String>();
+    }
+
+    public static class ImportSingleResult {
+        public boolean success = false;
+        public String message = "";
     }
 
     /**
@@ -115,9 +122,12 @@ public class BackupImporter {
                 }
 
                 try {
-                    extractFile(zis, destFile);
-                    result.importedFiles++;
-                    result.importedNames.add(getDisplayName(fileName));
+                    extractFile(zis, destFile, result);
+                    // Check if file was actually created (not skipped binary)
+                    if (destFile.exists()) {
+                        result.importedFiles++;
+                        result.importedNames.add(getDisplayName(fileName));
+                    }
                 } catch (IOException e) {
                     result.errors.add(fileName + ": " + e.getMessage());
                 }
@@ -416,9 +426,34 @@ public class BackupImporter {
     /**
      * Import a single song file by copying it to FreeSong folder.
      */
-    public static boolean importSingleFile(File sourceFile) throws IOException {
+    public static ImportSingleResult importSingleFile(File sourceFile) throws IOException {
+        ImportSingleResult result = new ImportSingleResult();
+
         if (!isSongFile(sourceFile.getName().toLowerCase())) {
-            return false;
+            result.success = false;
+            result.message = "Not a song file";
+            return result;
+        }
+
+        // Check for binary content
+        byte[] header = new byte[1024];
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(sourceFile);
+            int read = fis.read(header);
+            if (read > 0) {
+                byte[] checkBytes = read < header.length ? java.util.Arrays.copyOf(header, read) : header;
+                String binaryType = detectBinaryContent(checkBytes);
+                if (binaryType != null) {
+                    result.success = false;
+                    result.message = "Cannot import " + binaryType;
+                    return result;
+                }
+            }
+        } finally {
+            if (fis != null) {
+                try { fis.close(); } catch (IOException e) { }
+            }
         }
 
         File destDir = new File(Environment.getExternalStorageDirectory(), "FreeSong");
@@ -428,11 +463,15 @@ public class BackupImporter {
 
         File destFile = new File(destDir, sourceFile.getName());
         if (destFile.exists()) {
-            return false; // Already exists
+            result.success = false;
+            result.message = "File already exists";
+            return result;
         }
 
         copyFile(sourceFile, destFile);
-        return true;
+        result.success = true;
+        result.message = "Imported successfully";
+        return result;
     }
 
     private static boolean isSongFile(String lowerName) {
@@ -448,40 +487,105 @@ public class BackupImporter {
     private static final Charset MAC_ROMAN = Charset.forName("x-MacRoman");
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
-    private static void extractFile(ZipInputStream zis, File destFile) throws IOException {
+    /**
+     * Check if content appears to be binary (PDF, image, etc).
+     * Returns a description of detected binary type, or null if text.
+     */
+    private static String detectBinaryContent(byte[] content) {
+        if (content == null || content.length < 8) {
+            return null;
+        }
+
+        // PDF: starts with %PDF
+        if (content[0] == '%' && content[1] == 'P' &&
+            content[2] == 'D' && content[3] == 'F') {
+            return "PDF document";
+        }
+
+        // PNG: starts with 0x89 PNG
+        if ((content[0] & 0xFF) == 0x89 && content[1] == 'P' &&
+            content[2] == 'N' && content[3] == 'G') {
+            return "PNG image";
+        }
+
+        // JPEG: starts with 0xFF 0xD8 0xFF
+        if ((content[0] & 0xFF) == 0xFF && (content[1] & 0xFF) == 0xD8 &&
+            (content[2] & 0xFF) == 0xFF) {
+            return "JPEG image";
+        }
+
+        // GIF: starts with GIF87a or GIF89a
+        if (content[0] == 'G' && content[1] == 'I' && content[2] == 'F' &&
+            content[3] == '8' && (content[4] == '7' || content[4] == '9')) {
+            return "GIF image";
+        }
+
+        // BMP: starts with BM
+        if (content[0] == 'B' && content[1] == 'M') {
+            return "BMP image";
+        }
+
+        // Check for high proportion of non-printable characters (binary indicator)
+        int nonPrintable = 0;
+        int checkLength = Math.min(content.length, 1024);
+        for (int i = 0; i < checkLength; i++) {
+            byte b = content[i];
+            // Allow printable ASCII, tabs, newlines, and high UTF-8 bytes
+            if (b != 0x09 && b != 0x0A && b != 0x0D &&
+                (b < 0x20 || b == 0x7F) && b >= 0) {
+                nonPrintable++;
+            }
+        }
+
+        // If more than 10% non-printable in first 1KB, likely binary
+        if (nonPrintable > checkLength / 10) {
+            return "binary file";
+        }
+
+        return null; // Appears to be text
+    }
+
+    private static void extractFile(ZipInputStream zis, File destFile, ImportResult result) throws IOException {
         // For text files, convert from Mac Roman to UTF-8
         String name = destFile.getName().toLowerCase();
         if (name.endsWith(".txt") || name.endsWith(".onsong") ||
             name.endsWith(".chordpro") || name.endsWith(".cho") ||
             name.endsWith(".crd") || name.endsWith(".pro")) {
-            extractTextFile(zis, destFile);
+            extractTextFile(zis, destFile, result);
         } else {
             extractBinaryFile(zis, destFile);
         }
     }
 
-    private static void extractTextFile(ZipInputStream zis, File destFile) throws IOException {
-        BufferedReader reader = null;
+    private static void extractTextFile(ZipInputStream zis, File destFile, ImportResult result) throws IOException {
+        // First, read raw bytes to check for binary content
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        byte[] buffer = new byte[BUFFER_SIZE];
+        int count;
+        while ((count = zis.read(buffer, 0, BUFFER_SIZE)) != -1) {
+            baos.write(buffer, 0, count);
+        }
+        byte[] rawBytes = baos.toByteArray();
+
+        // Check for binary content
+        String binaryType = detectBinaryContent(rawBytes);
+        if (binaryType != null) {
+            result.skippedBinary++;
+            result.warnings.add(destFile.getName() + ": Skipped (" + binaryType + ")");
+            return;
+        }
+
+        // Convert from Mac Roman to UTF-8 and write
         BufferedWriter writer = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(zis, MAC_ROMAN));
+            String content = new String(rawBytes, MAC_ROMAN);
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile), UTF8));
-
-            String line;
-            boolean first = true;
-            while ((line = reader.readLine()) != null) {
-                if (!first) {
-                    writer.newLine();
-                }
-                writer.write(line);
-                first = false;
-            }
+            writer.write(content);
             writer.flush();
         } finally {
             if (writer != null) {
                 writer.close();
             }
-            // Don't close reader as it wraps the ZipInputStream
         }
     }
 

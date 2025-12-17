@@ -20,6 +20,8 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 - **Setlist Management**: Create and organize setlists for performances
 - **Song Editor**: Edit song files directly within the app
 - **Chord Format Converter**: Toggle between inline chords `[G]lyrics` and chords-above-lyrics format while editing
+- **Flat/Sharp Converter**: Toggle between sharp (#) and flat (b) chord notation with intelligent enharmonic conversion
+- **Delete from Editor**: Quick delete button in editor, or auto-delete when saving empty songs
 - **Swipe Navigation**: Navigate between songs with swipe gestures or edge taps (works in library and setlists)
 - **OnSong Backup Import**: Import songs directly from OnSong backup files (.backup, .zip)
 - **Screen Always On**: Prevents screen from dimming during song viewing
@@ -59,6 +61,7 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 FreeSong can import songs and setlists from OnSong backup files (`.backup`, `.zip`):
 - **Songs**: Extracts all songs from the OnSong SQLite database (not just loose files)
 - **Setlists**: Automatically imports your setlists and matches songs by title
+- **Binary Detection**: PDF and image files are automatically skipped with a warning
 
 **Important for Android 4.4 users:** OnSong creates backups using ZIP format version 4.5, which is not fully compatible with Android 4.4. If you get an error like "cannot read local header", you need to repack the backup on a PC:
 
@@ -95,7 +98,12 @@ This creates a compatible ZIP (version 2.0) that works on older Android devices.
 - Use the **Above/Inline** button to convert between chord formats:
   - **Inline**: `[G]Amazing [D]grace` (ChordPro style)
   - **Above**: Chords on separate line above lyrics (OnSong style)
+- Use the **-> b / -> #** button to convert chord notation:
+  - Converts between sharp and flat notation (C# ↔ Db, F# ↔ Gb, etc.)
+  - Useful when you prefer reading flats over sharps
+- Use the **Delete** button to remove the song (also removes from all setlists)
 - Make changes and tap **Save**
+- Saving an empty song offers to delete it automatically
 - Press **Cancel** or back to discard changes
 
 ### Theme

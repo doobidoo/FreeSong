@@ -5,6 +5,25 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2025-12-17
+
+### Added
+- **Delete from Editor**: Delete button in song editor for quick song removal
+- **Auto-Delete Empty Songs**: When saving an empty song, option to delete it automatically
+- **Flat/Sharp Toggle**: Convert all chords between sharp (#) and flat (b) notation
+  - Intelligent enharmonic conversion (C# ↔ Db, F# ↔ Gb, etc.)
+  - Works with both inline and chords-above formats
+  - Auto-detects current notation style
+- **Binary File Detection**: Import now skips PDF and image files with warning
+  - Detects PDF, PNG, JPEG, GIF, BMP formats
+  - Shows count of skipped files and warnings
+
+### Fixed
+- **Setlist Position Persistence**: Theme toggle and editing no longer resets position in setlist
+  - Scroll position, font size, and transposition are preserved
+- **Song Deletion Cleanup**: Deleted songs are automatically removed from all setlists
+- **Song List Refresh**: Main library updates immediately after deleting a song
+
 ## [1.6.0] - 2025-12-16
 
 ### Added

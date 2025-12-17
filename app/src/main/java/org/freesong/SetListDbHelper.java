@@ -291,4 +291,36 @@ public class SetListDbHelper extends SQLiteOpenHelper {
 
         updateSetListModifiedTime(setListId);
     }
+
+    /**
+     * Remove a song from all setlists by its file path.
+     * Called when a song is deleted from the file system.
+     * @param songPath The absolute path of the deleted song
+     * @return Number of setlist entries removed
+     */
+    public int removeSongFromAllSetLists(String songPath) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        // Find all setlists containing this song
+        Cursor cursor = db.query(true, TABLE_SETLIST_ITEMS, new String[]{COL_SETLIST_ID},
+            COL_SONG_PATH + " = ?", new String[]{songPath}, null, null, null, null);
+
+        List<Long> affectedSetLists = new ArrayList<Long>();
+        while (cursor.moveToNext()) {
+            affectedSetLists.add(cursor.getLong(0));
+        }
+        cursor.close();
+
+        // Delete all entries with this song path
+        int deleted = db.delete(TABLE_SETLIST_ITEMS, COL_SONG_PATH + " = ?",
+            new String[]{songPath});
+
+        // Reorder items in affected setlists
+        for (Long setListId : affectedSetLists) {
+            reorderSetListItems(setListId);
+            updateSetListModifiedTime(setListId);
+        }
+
+        return deleted;
+    }
 }

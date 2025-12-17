@@ -79,6 +79,16 @@ public class SongViewActivity extends Activity {
         ThemeManager.applyFullscreenTheme(this);
         setContentView(R.layout.activity_song_view);
 
+        // Restore state from savedInstanceState if available (e.g., after theme toggle)
+        if (savedInstanceState != null) {
+            setlistPaths = savedInstanceState.getStringArrayList("setlistPaths");
+            currentIndex = savedInstanceState.getInt("currentIndex", -1);
+            songPath = savedInstanceState.getString("songPath");
+            transposition = savedInstanceState.getInt("transposition", 0);
+            fontSize = savedInstanceState.getFloat("fontSize", 18f);
+            scrollSpeed = savedInstanceState.getInt("scrollSpeed", 50);
+        }
+
         // Restore speed bar visibility from preferences (persists across app exits)
         speedBarVisible = ThemeManager.isSpeedBarVisible(this);
 
@@ -104,8 +114,24 @@ public class SongViewActivity extends Activity {
         speedBar.setVisibility(speedBarVisible ? View.VISIBLE : View.GONE);
         scrollBarBtn.setText(speedBarVisible ? "▼" : "▲");
 
+        // Restore scroll speed to seekbar
+        if (savedInstanceState != null) {
+            speedSeekBar.setProgress((scrollSpeed - 10) / 2);
+        }
+
         loadSong();
         setupGestures();
+
+        // Restore scroll position after view is laid out
+        if (savedInstanceState != null) {
+            final int scrollPosition = savedInstanceState.getInt("scrollPosition", 0);
+            scrollView.post(new Runnable() {
+                @Override
+                public void run() {
+                    scrollView.scrollTo(0, scrollPosition);
+                }
+            });
+        }
     }
 
     private void initViews() {
@@ -265,27 +291,42 @@ public class SongViewActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_EDIT && resultCode == RESULT_OK) {
-            // Reload the song after editing
-            transposition = 0;
-            loadSong();
+        if (requestCode == REQUEST_EDIT) {
+            if (resultCode == RESULT_OK) {
+                // Reload the song after editing
+                transposition = 0;
+                loadSong();
+            } else if (resultCode == SongEditActivity.RESULT_DELETED) {
+                // Song was deleted, close viewer and return to list
+                setResult(RESULT_OK); // Signal refresh to MainActivity
+                finish();
+            }
         }
     }
 
     private void loadSong() {
-        songPath = getIntent().getStringExtra("songPath");
+        // Only read from Intent if not already set (from savedInstanceState)
+        if (songPath == null) {
+            songPath = getIntent().getStringExtra("songPath");
+        }
         if (songPath == null) {
             Toast.makeText(this, "No song path provided", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Get setlist navigation info if available
-        setlistPaths = getIntent().getStringArrayListExtra("setlistPaths");
-        currentIndex = getIntent().getIntExtra("currentIndex", -1);
+        // Get setlist navigation info if not already restored
+        if (setlistPaths == null) {
+            setlistPaths = getIntent().getStringArrayListExtra("setlistPaths");
+            currentIndex = getIntent().getIntExtra("currentIndex", -1);
+        }
 
         try {
             song = SongParser.parseFile(new File(songPath));
+            // Apply saved transposition if any
+            if (transposition != 0) {
+                Transposer.transposeSong(song, transposition);
+            }
             displaySong();
         } catch (Exception e) {
             Toast.makeText(this, "Error loading song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -520,5 +561,21 @@ public class SongViewActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         stopAutoScroll();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Persist setlist navigation state
+        if (setlistPaths != null) {
+            outState.putStringArrayList("setlistPaths", setlistPaths);
+            outState.putInt("currentIndex", currentIndex);
+        }
+        // Persist other view state
+        outState.putString("songPath", songPath);
+        outState.putInt("transposition", transposition);
+        outState.putFloat("fontSize", fontSize);
+        outState.putInt("scrollSpeed", scrollSpeed);
+        outState.putInt("scrollPosition", scrollView.getScrollY());
     }
 }

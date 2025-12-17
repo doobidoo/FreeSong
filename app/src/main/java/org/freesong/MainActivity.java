@@ -36,6 +36,7 @@ import java.util.Map;
 public class MainActivity extends Activity {
 
     private static final int REQUEST_IMPORT = 100;
+    private static final int REQUEST_VIEW = 101;
 
     private ListView songListView;
     private TextView emptyText;
@@ -190,9 +191,11 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMPORT && resultCode == RESULT_OK) {
-            // Reload songs after import
-            loadSongs();
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_IMPORT || requestCode == REQUEST_VIEW) {
+                // Reload songs after import or after a song was deleted
+                loadSongs();
+            }
         }
     }
 
@@ -413,7 +416,7 @@ public class MainActivity extends Activity {
         intent.putStringArrayListExtra("setlistPaths", songPaths);
         intent.putExtra("currentIndex", filteredSongFiles.indexOf(file));
 
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_VIEW);
     }
 
     private void showSongInfo(final File file) {

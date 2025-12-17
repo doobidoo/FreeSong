@@ -24,6 +24,8 @@ import java.io.OutputStreamWriter;
  */
 public class SongEditActivity extends Activity {
 
+    public static final int RESULT_DELETED = 2;
+
     private LinearLayout rootLayout;
     private LinearLayout headerLayout;
     private TextView titleText;
@@ -32,9 +34,12 @@ public class SongEditActivity extends Activity {
     private Button saveBtn;
     private Button themeBtn;
     private Button formatBtn;
+    private Button deleteBtn;
+    private Button accidentalBtn;
     private String songPath;
     private String originalContent;
     private boolean isInlineMode = true; // Track current format (inline = ChordPro style)
+    private boolean useSharps = true; // Track current accidental style
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,8 @@ public class SongEditActivity extends Activity {
         saveBtn = (Button) findViewById(R.id.saveBtn);
         themeBtn = (Button) findViewById(R.id.themeBtn);
         formatBtn = (Button) findViewById(R.id.formatBtn);
+        deleteBtn = (Button) findViewById(R.id.deleteBtn);
+        accidentalBtn = (Button) findViewById(R.id.accidentalBtn);
 
         applyThemeColors();
         updateThemeButton();
@@ -65,6 +72,20 @@ public class SongEditActivity extends Activity {
             @Override
             public void onClick(View v) {
                 toggleTheme();
+            }
+        });
+
+        deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confirmDelete();
+            }
+        });
+
+        accidentalBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleAccidentals();
             }
         });
 
@@ -139,6 +160,10 @@ public class SongEditActivity extends Activity {
             // Detect initial format and update button
             isInlineMode = ChordFormatConverter.isInlineFormat(originalContent);
             updateFormatButton();
+
+            // Detect initial accidental style and update button
+            useSharps = AccidentalConverter.isSharpsFormat(originalContent);
+            updateAccidentalButton();
         } catch (Exception e) {
             Toast.makeText(this, "Error loading song: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             finish();
@@ -178,8 +203,15 @@ public class SongEditActivity extends Activity {
     }
 
     private void saveSong() {
+        String newContent = songEditor.getText().toString();
+
+        // Check if content is empty/whitespace only
+        if (newContent.trim().isEmpty()) {
+            confirmDeleteEmptySong();
+            return;
+        }
+
         try {
-            String newContent = songEditor.getText().toString();
             File file = new File(songPath);
             OutputStreamWriter writer = new OutputStreamWriter(
                 new FileOutputStream(file), "UTF-8");
@@ -192,6 +224,109 @@ public class SongEditActivity extends Activity {
             finish();
         } catch (Exception e) {
             Toast.makeText(this, "Error saving: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void confirmDelete() {
+        new AlertDialog.Builder(this)
+            .setTitle("Delete Song")
+            .setMessage("Delete this song?\n\nThis cannot be undone.")
+            .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    deleteSong();
+                }
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void deleteSong() {
+        File file = new File(songPath);
+        if (file.delete()) {
+            // Remove song from all setlists
+            SetListDbHelper dbHelper = SetListDbHelper.getInstance(this);
+            int removedFromSetlists = dbHelper.removeSongFromAllSetLists(songPath);
+
+            String message = "Song deleted";
+            if (removedFromSetlists > 0) {
+                message += " (removed from " + removedFromSetlists + " setlist" +
+                    (removedFromSetlists > 1 ? "s" : "") + ")";
+            }
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("deletedPath", songPath);
+            setResult(RESULT_DELETED, resultIntent);
+            finish();
+        } else {
+            Toast.makeText(this, "Could not delete file", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void confirmDeleteEmptySong() {
+        new AlertDialog.Builder(this)
+            .setTitle("Empty Song")
+            .setMessage("This song is empty. Delete it?")
+            .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    deleteSong();
+                }
+            })
+            .setNegativeButton("Keep Empty", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    saveEmptySong();
+                }
+            })
+            .setNeutralButton("Cancel", null)
+            .show();
+    }
+
+    private void saveEmptySong() {
+        try {
+            String newContent = songEditor.getText().toString();
+            File file = new File(songPath);
+            OutputStreamWriter writer = new OutputStreamWriter(
+                new FileOutputStream(file), "UTF-8");
+            writer.write(newContent);
+            writer.close();
+            originalContent = newContent;
+            Toast.makeText(this, "Song saved", Toast.LENGTH_SHORT).show();
+            setResult(RESULT_OK);
+            finish();
+        } catch (Exception e) {
+            Toast.makeText(this, "Error saving: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void toggleAccidentals() {
+        String content = songEditor.getText().toString();
+        int cursorPos = songEditor.getSelectionStart();
+
+        String converted;
+        if (useSharps) {
+            // Currently sharps, convert to flats
+            converted = AccidentalConverter.convertToFlats(content);
+            useSharps = false;
+        } else {
+            // Currently flats, convert to sharps
+            converted = AccidentalConverter.convertToSharps(content);
+            useSharps = true;
+        }
+
+        songEditor.setText(converted);
+        songEditor.setSelection(Math.min(cursorPos, converted.length()));
+        updateAccidentalButton();
+    }
+
+    private void updateAccidentalButton() {
+        // Show what you'll convert TO when clicked
+        if (useSharps) {
+            accidentalBtn.setText("-> b");
+        } else {
+            accidentalBtn.setText("-> #");
         }
     }
 
