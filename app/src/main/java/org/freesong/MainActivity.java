@@ -52,12 +52,16 @@ public class MainActivity extends Activity {
     private Map<File, String> songArtists = new HashMap<File, String>();
     private ArrayAdapter<String> adapter;
     private boolean songsLoaded = false;
+    private SongMetadataCache metadataCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThemeManager.applyTheme(this);
         setContentView(R.layout.activity_main);
+
+        // Initialize metadata cache
+        metadataCache = SongMetadataCache.getInstance(this);
 
         songListView = (ListView) findViewById(R.id.songListView);
         emptyText = (TextView) findViewById(R.id.emptyText);
@@ -326,13 +330,24 @@ public class MainActivity extends Activity {
     private void loadSongInfo(File file) {
         String title = null;
         String artist = "";
+
+        // 1. Try cache first (fastest path)
+        SongMetadataCache.CachedMetadata cached = metadataCache.getCached(file);
+        if (cached != null) {
+            songTitles.put(file, cached.title);
+            songArtists.put(file, cached.artist);
+            return;
+        }
+
+        // 2. Parse metadata only (reads first 30 lines, not entire file)
         try {
-            Song song = SongParser.parseFile(file);
-            title = song.getTitle();
-            artist = song.getArtist();
+            String[] metadata = SongParser.parseMetadataOnly(file);
+            title = metadata[0];
+            artist = metadata[1];
         } catch (Exception e) {
             // Fall back to filename
         }
+
         // Use filename without extension as fallback for title
         if (title == null || title.isEmpty()) {
             String name = file.getName();
@@ -342,6 +357,10 @@ public class MainActivity extends Activity {
             }
             title = name;
         }
+
+        // 3. Cache for next time
+        metadataCache.cache(file, title, artist != null ? artist : "");
+
         songTitles.put(file, title);
         songArtists.put(file, artist != null ? artist : "");
     }

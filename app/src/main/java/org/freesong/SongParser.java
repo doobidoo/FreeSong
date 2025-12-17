@@ -36,6 +36,95 @@ public class SongParser {
     }
 
     /**
+     * Parse only metadata (title, artist) from a file.
+     * Reads only the first 30 lines for performance.
+     * Returns String[2] = {title, artist}.
+     */
+    public static String[] parseMetadataOnly(File file) throws IOException {
+        String title = null;
+        String artist = null;
+        boolean firstLine = true;
+        boolean secondLine = true;
+        int lineCount = 0;
+        final int MAX_LINES = 30;
+
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(new FileInputStream(file), "UTF-8"));
+
+        try {
+            String line;
+            while ((line = reader.readLine()) != null && lineCount < MAX_LINES) {
+                lineCount++;
+                String trimmedLine = line.trim();
+
+                if (trimmedLine.isEmpty()) {
+                    continue;
+                }
+
+                // Check for ChordPro tags {tag: value}
+                Matcher tagMatcher = CHORDPRO_TAG.matcher(trimmedLine);
+                while (tagMatcher.find()) {
+                    String tag = tagMatcher.group(1).toLowerCase();
+                    String value = tagMatcher.group(2);
+                    if (value == null) value = "";
+                    value = value.trim();
+
+                    if ((tag.equals("title") || tag.equals("t")) && title == null) {
+                        title = value;
+                    } else if ((tag.equals("subtitle") || tag.equals("st") ||
+                               tag.equals("su") || tag.equals("artist")) && artist == null) {
+                        artist = value;
+                    }
+
+                    // If we found both, we're done
+                    if (title != null && artist != null) {
+                        return new String[]{title, artist};
+                    }
+                }
+
+                // OnSong format: first non-tag line is title, second is artist
+                if (firstLine && !trimmedLine.startsWith("{") && !trimmedLine.startsWith("[")) {
+                    if (title == null) {
+                        title = trimmedLine;
+                    }
+                    firstLine = false;
+                    continue;
+                }
+
+                if (secondLine && !trimmedLine.startsWith("{") && !trimmedLine.startsWith("[") &&
+                    !CHORD_PATTERN.matcher(trimmedLine).find() && !isChordOnlyLine(trimmedLine)) {
+                    if (artist == null) {
+                        artist = trimmedLine;
+                    }
+                    secondLine = false;
+
+                    // If we have title from OnSong format, we're done
+                    if (title != null) {
+                        return new String[]{title, artist != null ? artist : ""};
+                    }
+                }
+
+                firstLine = false;
+                secondLine = false;
+            }
+        } finally {
+            reader.close();
+        }
+
+        // Fallback: use filename as title
+        if (title == null || title.isEmpty()) {
+            String name = file.getName();
+            int dotIndex = name.lastIndexOf('.');
+            if (dotIndex > 0) {
+                name = name.substring(0, dotIndex);
+            }
+            title = name;
+        }
+
+        return new String[]{title, artist != null ? artist : ""};
+    }
+
+    /**
      * Parse song content from string.
      */
     public static Song parse(String content) {

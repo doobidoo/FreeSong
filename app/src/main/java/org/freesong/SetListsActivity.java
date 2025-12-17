@@ -2,8 +2,10 @@ package org.freesong;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -148,12 +150,7 @@ public class SetListsActivity extends Activity {
             .setPositiveButton("Restore", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    int restored = SetlistBackupManager.importSetlists(SetListsActivity.this, false);
-                    if (restored > 0) {
-                        Toast.makeText(SetListsActivity.this,
-                            "Restored " + restored + " setlist(s)", Toast.LENGTH_SHORT).show();
-                    }
-                    loadSetLists();
+                    new ImportSetlistsTask(true).execute(false);
                 }
             })
             .setNegativeButton("Skip", new DialogInterface.OnClickListener() {
@@ -198,14 +195,7 @@ public class SetListsActivity extends Activity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     boolean merge = (which == 1);
-                    int imported = SetlistBackupManager.importSetlists(SetListsActivity.this, merge);
-                    if (imported >= 0) {
-                        Toast.makeText(SetListsActivity.this,
-                            "Imported " + imported + " setlist(s)", Toast.LENGTH_SHORT).show();
-                        loadSetLists();
-                    } else {
-                        Toast.makeText(SetListsActivity.this, "Import failed", Toast.LENGTH_SHORT).show();
-                    }
+                    new ImportSetlistsTask(false).execute(merge);
                 }
             })
             .setNegativeButton("Cancel", null)
@@ -327,6 +317,49 @@ public class SetListsActivity extends Activity {
             })
             .setNegativeButton("Cancel", null)
             .show();
+    }
+
+    /**
+     * AsyncTask to perform setlist import in background thread.
+     * Prevents ANR when importing large backup files.
+     */
+    private class ImportSetlistsTask extends AsyncTask<Boolean, Void, Integer> {
+        private ProgressDialog progressDialog;
+        private boolean isAutoRestore;
+
+        public ImportSetlistsTask(boolean isAutoRestore) {
+            this.isAutoRestore = isAutoRestore;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(SetListsActivity.this);
+            progressDialog.setMessage("Importing setlists...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Boolean... params) {
+            boolean merge = params[0];
+            return SetlistBackupManager.importSetlists(SetListsActivity.this, merge);
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+
+            if (result >= 0) {
+                String action = isAutoRestore ? "Restored" : "Imported";
+                Toast.makeText(SetListsActivity.this,
+                    action + " " + result + " setlist(s)", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(SetListsActivity.this, "Import failed", Toast.LENGTH_SHORT).show();
+            }
+            loadSetLists();
+        }
     }
 
     private class SetListAdapter extends BaseAdapter {

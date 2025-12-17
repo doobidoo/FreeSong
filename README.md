@@ -24,8 +24,10 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 - **Flat/Sharp Converter**: Toggle between sharp (#) and flat (b) chord notation with intelligent enharmonic conversion
 - **Delete from Editor**: Quick delete button in editor, or auto-delete when saving empty songs
 - **Swipe Navigation**: Navigate between songs with swipe gestures or edge taps (works in library and setlists)
+- **Bluetooth Page Turner**: Support for CubeTurner and similar Bluetooth HID page turners with configurable modes
 - **OnSong Backup Import**: Import songs directly from OnSong backup files (.backup, .zip)
 - **Screen Always On**: Prevents screen from dimming during song viewing
+- **Fast Startup**: Song metadata caching for ~26x faster app startup after first load
 
 ## Requirements
 
@@ -106,6 +108,15 @@ This creates a compatible ZIP (version 2.0) that works on older Android devices.
 - Make changes and tap **Save**
 - Saving an empty song offers to delete it automatically
 - Press **Cancel** or back to discard changes
+
+### Bluetooth Page Turner
+FreeSong supports Bluetooth page turners like the CubeTurner:
+- Tap **Pedal** button in song view to configure
+- Three modes available:
+  - **Scroll**: Page up/down (scroll one screen)
+  - **Navigate**: Next/previous song (jump between songs)
+  - **Smart**: Scrolls to end, then shows warning, then navigates on second press
+- Works with touch-based page turners (CubeTurner sends touch/swipe events)
 
 ### Theme
 - Tap the sun/moon button in the main screen to toggle dark/light mode

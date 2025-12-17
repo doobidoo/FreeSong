@@ -5,6 +5,31 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2025-12-17
+
+### Added
+- **Song Metadata Cache**: SQLite cache stores title/artist metadata for ~26x faster app startup
+- **Header-Only Parsing**: Only reads first 30 lines of song files when extracting metadata (~4x faster initial load)
+- **SongPicker AsyncTask**: Song picker now loads songs in background thread with progress dialog
+
+### Fixed
+- **Setlist Import ANR**: Import now runs in background thread, preventing ANR/freeze
+- **SongPicker ANR**: Song loading in picker now runs in background thread
+
+### Performance
+- First app startup: ~8s → ~2s (4x faster)
+- Subsequent startups: ~8s → ~0.3s (26x faster)
+- Song picker opening: ANR risk → ~0.3s
+
+## [1.9.0] - 2025-12-17
+
+### Added
+- **Bluetooth Page Turner**: Support for CubeTurner and similar Bluetooth HID page turners
+  - Three modes: "Scroll" (page up/down), "Navigate" (next/prev song), "Smart" (scroll then navigate)
+  - Pedal button in song view to configure mode
+  - Works with touch-based page turners (CubeTurner sends touch events, not key events)
+- **Smart Page Turner Mode**: Scrolls to end of song, shows warning, then navigates to next song on second press
+
 ## [1.8.0] - 2025-12-17
 
 ### Added
