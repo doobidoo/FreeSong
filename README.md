@@ -26,6 +26,7 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 - **Swipe Navigation**: Navigate between songs with swipe gestures or edge taps (works in library and setlists)
 - **Bluetooth Page Turner**: Support for CubeTurner and similar Bluetooth HID page turners with configurable modes
 - **OnSong Backup Import**: Import songs directly from OnSong backup files (.backup, .zip)
+- **GitHub Sync**: Backup songs and setlists to a GitHub repository for cloud backup and multi-device sync
 - **Screen Always On**: Prevents screen from dimming during song viewing
 - **Fast Startup**: Song metadata caching for ~26x faster app startup after first load
 
@@ -120,6 +121,26 @@ FreeSong supports Bluetooth page turners like the CubeTurner:
 
 ### Theme
 - Tap the sun/moon button in the main screen to toggle dark/light mode
+
+### GitHub Sync
+Sync your songs and setlists to a GitHub repository for cloud backup and multi-device synchronization:
+
+1. **Create a GitHub repository** for your songs (e.g., `my-songs-backup`)
+2. **Generate a Personal Access Token**:
+   - Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Generate a new token with `repo` scope
+3. **Configure FreeSong**:
+   - Long-press the sync button (↻) in the header bar
+   - Enter your token and repository (format: `username/repo-name`)
+   - Tap "Test Connection" to verify
+   - Tap "Save"
+4. **Sync your songs**:
+   - Tap the sync button (↻) to start syncing
+   - New songs are uploaded to GitHub
+   - Songs only on GitHub are downloaded to your device
+   - Conflicts create a `_conflict` file so you can choose which version to keep
+
+**Note**: Sync is manual only - tap the button when you want to sync.
 
 ## Supported File Formats
 
