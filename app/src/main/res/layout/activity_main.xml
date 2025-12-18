@@ -35,6 +35,14 @@
             android:layout_marginRight="4dp" />
 
         <Button
+            android:id="@+id/syncBtn"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:text="@string/sync_icon"
+            android:textSize="18sp"
+            android:layout_marginRight="4dp" />
+
+        <Button
             android:id="@+id/themeBtn"
             android:layout_width="40dp"
             android:layout_height="wrap_content"

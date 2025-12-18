@@ -2,8 +2,10 @@ package org.freesong;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -45,6 +47,7 @@ public class MainActivity extends Activity {
     private Button themeBtn;
     private Button importBtn;
     private Button aboutBtn;
+    private Button syncBtn;
     private EditText searchField;
     private List<File> allSongFiles = new ArrayList<File>();
     private List<File> filteredSongFiles = new ArrayList<File>();
@@ -57,6 +60,10 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Enable TLS 1.2 for Android 4.4 (required for GitHub API)
+        TLSSocketFactory.enableTLS12();
+
         ThemeManager.applyTheme(this);
         setContentView(R.layout.activity_main);
 
@@ -70,6 +77,7 @@ public class MainActivity extends Activity {
         themeBtn = (Button) findViewById(R.id.themeBtn);
         importBtn = (Button) findViewById(R.id.importBtn);
         aboutBtn = (Button) findViewById(R.id.aboutBtn);
+        syncBtn = (Button) findViewById(R.id.syncBtn);
         searchField = (EditText) findViewById(R.id.searchField);
 
         aboutBtn.setOnClickListener(new View.OnClickListener() {
@@ -97,6 +105,25 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 openImport();
+            }
+        });
+
+        syncBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (GitHubConfig.isConfigured(MainActivity.this)) {
+                    performSync();
+                } else {
+                    Toast.makeText(MainActivity.this, R.string.github_not_configured, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        syncBtn.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                openGitHubSettings();
+                return true;
             }
         });
 
@@ -546,6 +573,63 @@ public class MainActivity extends Activity {
             })
             .setNegativeButton("Cancel", null)
             .show();
+    }
+
+    private void openGitHubSettings() {
+        Intent intent = new Intent(this, GitHubSettingsActivity.class);
+        startActivity(intent);
+    }
+
+    private void performSync() {
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setMessage(getString(R.string.github_syncing));
+        dialog.setCancelable(false);
+        dialog.show();
+
+        final Handler handler = new Handler();
+
+        new AsyncTask<Void, String, GitHubSyncManager.SyncResult>() {
+            @Override
+            protected GitHubSyncManager.SyncResult doInBackground(Void... params) {
+                GitHubSyncManager syncManager = new GitHubSyncManager(MainActivity.this);
+                syncManager.setCallback(new GitHubSyncManager.SyncCallback() {
+                    @Override
+                    public void onProgress(final String message) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.setMessage(message);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onComplete(GitHubSyncManager.SyncResult result) {
+                        // Not used - we handle in onPostExecute
+                    }
+                });
+                return syncManager.syncAll();
+            }
+
+            @Override
+            protected void onPostExecute(GitHubSyncManager.SyncResult result) {
+                if (dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+
+                // Show result dialog
+                new AlertDialog.Builder(MainActivity.this)
+                    .setTitle(R.string.github_sync_complete)
+                    .setMessage(result.getSummary())
+                    .setPositiveButton(R.string.ok, null)
+                    .show();
+
+                // Reload songs if anything was downloaded
+                if (result.downloaded > 0) {
+                    loadSongs();
+                }
+            }
+        }.execute();
     }
 
     private void showAboutDialog() {

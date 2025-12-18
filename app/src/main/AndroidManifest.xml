@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -52,6 +53,10 @@
         <activity
             android:name=".SongEditActivity"
             android:label="Edit Song" />
+
+        <activity
+            android:name=".GitHubSettingsActivity"
+            android:label="GitHub Sync" />
 
     </application>
 

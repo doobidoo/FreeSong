@@ -5,6 +5,24 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2025-12-18
+
+### Added
+- **GitHub Sync**: Sync songs and setlists to a GitHub repository for backup and multi-device sync
+  - Manual sync via button in header bar (↻)
+  - Long-press sync button to configure GitHub token and repository
+  - Batch upload: uploads up to 25 songs per commit for efficiency
+  - Bidirectional sync: downloads new songs from repo, uploads local songs
+  - Conflict handling: keeps both versions when files differ
+- **GitHub Settings Activity**: Configure Personal Access Token and repository (owner/repo format)
+- **TLS 1.2 Support**: Enables TLS 1.2 on Android 4.4 devices for secure GitHub API connections
+
+### Technical
+- Uses GitHub REST API with Git Trees API for efficient batch uploads
+- Blob-based upload approach for reliable large file handling
+- PATCH method workaround with X-HTTP-Method-Override header for Android 4.4 compatibility
+- Detailed error reporting in sync result dialog
+
 ## [1.10.0] - 2025-12-17
 
 ### Added

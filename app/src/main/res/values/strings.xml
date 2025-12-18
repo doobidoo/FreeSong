@@ -17,4 +17,35 @@
     <string name="app_license">MIT License</string>
     <string name="app_description">A free, open-source alternative to OnSong for displaying song lyrics and chords. Designed for musicians who need a simple, reliable lead sheet viewer.</string>
     <string name="app_url">https://github.com/doobidoo/FreeSong</string>
+
+    <!-- GitHub Sync -->
+    <string name="sync_icon">↻</string>
+    <string name="back_icon">←</string>
+    <string name="github_settings_title">GitHub Sync</string>
+    <string name="github_instructions">Enter your GitHub Personal Access Token and repository name to sync your songs and setlists.\n\nCreate a token at: github.com/settings/tokens\nRequired scope: repo</string>
+    <string name="github_token_label">Personal Access Token:</string>
+    <string name="github_token_hint">ghp_xxxxxxxxxxxx</string>
+    <string name="github_repo_label">Repository (owner/repo):</string>
+    <string name="github_repo_hint">username/FreeSong-Backup</string>
+    <string name="github_test">Test</string>
+    <string name="github_save">Save</string>
+    <string name="github_clear">Clear Config</string>
+    <string name="github_testing">Testing connection…</string>
+    <string name="github_connection_success">Connection successful!</string>
+    <string name="github_connection_failed">Connection failed</string>
+    <string name="github_token_required">Please enter a token</string>
+    <string name="github_repo_required">Please enter a repository</string>
+    <string name="github_repo_format">Repository must be in format: owner/repo</string>
+    <string name="github_config_saved">Configuration saved</string>
+    <string name="github_config_cleared">Configuration cleared</string>
+    <string name="github_clear_title">Clear Configuration</string>
+    <string name="github_clear_message">Remove GitHub sync settings?</string>
+    <string name="github_never_synced">Never synced</string>
+    <string name="github_last_sync">Last sync: %1$s</string>
+    <string name="github_syncing">Syncing…</string>
+    <string name="github_sync_complete">Sync Complete</string>
+    <string name="github_not_configured">GitHub sync not configured.\nLong-press Sync button to configure.</string>
+    <string name="clear">Clear</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 </resources>
