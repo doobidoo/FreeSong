@@ -5,6 +5,13 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.1] - 2025-12-20
+
+### Fixed
+- **Chord Position Bug**: Fixed inline chords appearing at wrong position in viewer
+  - Chords like `[G]Amazing [D]grace` now correctly display D above "grace" instead of at the start
+  - Position calculation in SongParser.parseLine() was computing position before adding preceding text
+
 ## [1.13.0] - 2025-12-20
 
 ### Added

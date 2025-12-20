@@ -411,8 +411,10 @@ public class SongParser {
         while (matcher.find()) {
             // Add text before this chord
             String textBefore = line.substring(lastEnd, matcher.start());
-            int position = lyrics.length();
             lyrics.append(textBefore);
+
+            // Chord position is AFTER the preceding text (where the chord appears)
+            int position = lyrics.length();
 
             // Add chord at current position
             String chord = matcher.group(1);
