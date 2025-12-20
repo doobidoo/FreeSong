@@ -5,6 +5,14 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2025-12-20
+
+### Added
+- **Standalone Bass Notation**: Support for bass movement notation without explicit chord
+  - Recognizes `/G`, `/Bb`, `/F#` etc. as valid chord symbols
+  - Common notation meaning "keep previous chord, move bass to this note"
+  - Enables proper parsing of songs with walking bass lines
+
 ## [1.14.0] - 2025-12-20
 
 ### Added

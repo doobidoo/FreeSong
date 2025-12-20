@@ -285,6 +285,7 @@ public class SongParser {
      * - Augmented: Caug, C+, C+7
      * - Half-diminished: Cø, Cø7, Cm7b5, Chdim7
      * - Slash chords: C/E, Am/G, Dm7/C
+     * - Standalone bass: /G, /Bb, /F# (bass movement, keep previous chord)
      * - Unicode symbols: C♯, D♭, C△7, C°, Cø
      */
     private static boolean isValidChord(String s) {
@@ -292,6 +293,12 @@ public class SongParser {
 
         // Remove parentheses for matching (e.g., m(maj7) -> mmaj7)
         String normalized = s.replaceAll("[()]", "");
+
+        // Support standalone bass notation like /G, /Bb, /F# (bass movement without explicit chord)
+        // This is common notation meaning "keep previous chord, move bass to this note"
+        if (normalized.matches("^/[A-G][#b♯♭]?$")) {
+            return true;
+        }
 
         return normalized.matches(
             "^[A-G][#b♯♭]?" +                                        // Root with accidental
