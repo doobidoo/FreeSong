@@ -45,6 +45,20 @@
             android:textSize="16sp" />
 
         <Button
+            android:id="@+id/fontDownBtn"
+            android:layout_width="36dp"
+            android:layout_height="40dp"
+            android:text="A-"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/fontUpBtn"
+            android:layout_width="36dp"
+            android:layout_height="40dp"
+            android:text="A+"
+            android:textSize="12sp" />
+
+        <Button
             android:id="@+id/formatBtn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"

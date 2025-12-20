@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Layout;
@@ -43,10 +44,15 @@ public class SongEditActivity extends Activity {
     private Button deleteBtn;
     private Button accidentalBtn;
     private Button helpBtn;
+    private Button fontUpBtn;
+    private Button fontDownBtn;
     private String songPath;
     private String originalContent;
     private boolean isInlineMode = true; // Track current format (inline = ChordPro style)
     private boolean useSharps = true; // Track current accidental style
+    private float fontSize = 14f; // Default editor font size
+    private static final String PREFS_NAME = "FreeSongEditorPrefs";
+    private static final String PREF_FONT_SIZE = "editorFontSize";
 
     // Floating toolbar for chord movement
     private PopupWindow chordMovePopup;
@@ -112,6 +118,27 @@ public class SongEditActivity extends Activity {
                 showChordHelp();
             }
         });
+
+        // Font size buttons
+        fontUpBtn = (Button) findViewById(R.id.fontUpBtn);
+        fontDownBtn = (Button) findViewById(R.id.fontDownBtn);
+
+        fontUpBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeFontSize(2);
+            }
+        });
+
+        fontDownBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeFontSize(-2);
+            }
+        });
+
+        // Load saved font size
+        loadFontSize();
 
         songPath = getIntent().getStringExtra("songPath");
         if (songPath == null) {
@@ -746,5 +773,28 @@ public class SongEditActivity extends Activity {
     @Override
     public void onBackPressed() {
         checkUnsavedChanges();
+    }
+
+    // ========== Font Size ==========
+
+    private void loadFontSize() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        fontSize = prefs.getFloat(PREF_FONT_SIZE, 14f);
+        applyFontSize();
+    }
+
+    private void saveFontSize() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        prefs.edit().putFloat(PREF_FONT_SIZE, fontSize).apply();
+    }
+
+    private void changeFontSize(float delta) {
+        fontSize = Math.max(10, Math.min(32, fontSize + delta));
+        applyFontSize();
+        saveFontSize();
+    }
+
+    private void applyFontSize() {
+        songEditor.setTextSize(fontSize);
     }
 }

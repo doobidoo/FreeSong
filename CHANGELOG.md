@@ -5,6 +5,14 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2025-12-20
+
+### Added
+- **Editor Font Size**: Adjustable font size in the song editor
+  - A- / A+ buttons in the editor header bar
+  - Font size range: 10sp to 32sp
+  - Setting is saved and restored between sessions
+
 ## [1.13.1] - 2025-12-20
 
 ### Fixed

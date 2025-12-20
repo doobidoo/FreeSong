@@ -16,6 +16,10 @@
         "source": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-main-6:/drawable/ic_launcher.xml"
     },
     {
+        "merged": "org.freesong.app-merged_res-4:/layout_activity_song_edit.xml.flat",
+        "source": "org.freesong.app-main-6:/layout/activity_song_edit.xml"
+    },
+    {
         "merged": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-merged_res-4:/layout_item_setlist.xml.flat",
         "source": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-main-6:/layout/item_setlist.xml"
     },
@@ -24,8 +28,16 @@
         "source": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-main-6:/layout/activity_song_view.xml"
     },
     {
+        "merged": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-merged_res-4:/layout_activity_github_settings.xml.flat",
+        "source": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-main-6:/layout/activity_github_settings.xml"
+    },
+    {
         "merged": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-merged_res-4:/layout_activity_main.xml.flat",
         "source": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-main-6:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-merged_res-4:/layout_chord_move_toolbar.xml.flat",
+        "source": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-main-6:/layout/chord_move_toolbar.xml"
     },
     {
         "merged": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-merged_res-4:/layout_activity_song_picker.xml.flat",
@@ -38,10 +50,6 @@
     {
         "merged": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-merged_res-4:/layout_activity_file_browser.xml.flat",
         "source": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-main-6:/layout/activity_file_browser.xml"
-    },
-    {
-        "merged": "org.freesong.app-merged_res-4:/layout_activity_main.xml.flat",
-        "source": "org.freesong.app-main-6:/layout/activity_main.xml"
     },
     {
         "merged": "/home/hkr/.gradle/daemon/8.5/org.freesong.app-merged_res-4:/layout_activity_song_edit.xml.flat",

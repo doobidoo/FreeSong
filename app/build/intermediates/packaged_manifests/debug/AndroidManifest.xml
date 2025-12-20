@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.freesong"
-    android:versionCode="6"
-    android:versionName="1.5.0" >
+    android:versionCode="15"
+    android:versionName="1.13.1" >
 
     <uses-sdk
         android:minSdkVersion="19"
@@ -10,6 +10,7 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -56,6 +57,9 @@
         <activity
             android:name="org.freesong.SongEditActivity"
             android:label="Edit Song" />
+        <activity
+            android:name="org.freesong.GitHubSettingsActivity"
+            android:label="GitHub Sync" />
     </application>
 
 </manifest>

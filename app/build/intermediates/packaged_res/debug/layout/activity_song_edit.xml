@@ -20,6 +20,14 @@
             android:layout_height="40dp"
             android:text="Cancel" />
 
+        <Button
+            android:id="@+id/deleteBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Delete"
+            android:textColor="#FF5555"
+            android:textSize="12sp" />
+
         <TextView
             android:id="@+id/editTitleText"
             android:layout_width="0dp"
@@ -35,6 +43,46 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/fontDownBtn"
+            android:layout_width="36dp"
+            android:layout_height="40dp"
+            android:text="A-"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/fontUpBtn"
+            android:layout_width="36dp"
+            android:layout_height="40dp"
+            android:text="A+"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/formatBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Above"
+            android:textSize="12sp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp" />
+
+        <Button
+            android:id="@+id/accidentalBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="#/b"
+            android:textSize="12sp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp" />
+
+        <Button
+            android:id="@+id/helpBtn"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="?"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/saveBtn"
