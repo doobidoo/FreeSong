@@ -22,6 +22,9 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 - **Song Editor**: Edit song files directly within the app
 - **Chord Format Converter**: Toggle between inline chords `[G]lyrics` and chords-above-lyrics format while editing
 - **Flat/Sharp Converter**: Toggle between sharp (#) and flat (b) chord notation with intelligent enharmonic conversion
+- **Nashville Number System**: Toggle between standard chords and Nashville notation (1-7) in the song viewer
+- **Chord Reference**: Help button in editor showing all supported chord notations
+- **Chord Move Toolbar**: Floating toolbar to move chords character-by-character or word-by-word in the editor
 - **Delete from Editor**: Quick delete button in editor, or auto-delete when saving empty songs
 - **Swipe Navigation**: Navigate between songs with swipe gestures or edge taps (works in library and setlists)
 - **Bluetooth Page Turner**: Support for CubeTurner and similar Bluetooth HID page turners with configurable modes
@@ -109,6 +112,31 @@ This creates a compatible ZIP (version 2.0) that works on older Android devices.
 - Make changes and tap **Save**
 - Saving an empty song offers to delete it automatically
 - Press **Cancel** or back to discard changes
+
+### Nashville Number System
+Toggle Nashville notation in the song viewer with the "1-7" button:
+- Converts standard chords to Nashville numbers based on the song's key
+- In key of C: C→1, Dm→2m, Em→3m, F→4, G→5, Am→6m, B°→7°
+- In key of G: G→1, Am→2m, Bm→3m, C→4, D→5, Em→6m, F#°→7°
+- Chord qualities are preserved: Am7 → 6m7, G7 → 5⁷
+- If no key is in the song metadata, a key selection dialog appears
+- Tap "A-G" to switch back to standard chord notation
+
+### Chord Reference
+Tap the "?" button in the song editor to see all supported chord notations:
+- Basic: C, Am, G7, Dm7, Cmaj7
+- Extended: Cm7#5, CmMaj7, Cm(maj7), C7alt
+- Unicode: C♯, D♭, C△7, C°, Cø
+- And many more combinations
+
+### Moving Chords (Editor)
+When editing a song in **inline mode** (ChordPro format), a floating toolbar appears when your cursor is inside a chord:
+- **◀◀**: Move chord one word to the left
+- **◀**: Move chord one character to the left
+- **▶**: Move chord one character to the right
+- **▶▶**: Move chord one word to the right
+
+This makes it easy to align chords precisely above the correct syllables on touch devices.
 
 ### Bluetooth Page Turner
 FreeSong supports Bluetooth page turners like the CubeTurner:

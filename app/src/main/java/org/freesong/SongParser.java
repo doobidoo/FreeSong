@@ -274,10 +274,34 @@ public class SongParser {
 
     /**
      * Check if a string is a valid chord symbol.
+     * Supports comprehensive chord notation including:
+     * - Basic: C, Am, G7, Dm7
+     * - Extended: Cmaj7, Cm7b5, C7#9, C9#11
+     * - Minor-Major: CmM7, CmMaj7, Cm(maj7), Cm△7
+     * - Alterations: C7#5, C7b9, Cm7#5, C7#5#9
+     * - Suspended: Csus4, C7sus4, Csus2
+     * - Added: Cadd9, C6/9, Cadd11
+     * - Diminished: Cdim, Cdim7, C°, C°7
+     * - Augmented: Caug, C+, C+7
+     * - Half-diminished: Cø, Cø7, Cm7b5, Chdim7
+     * - Slash chords: C/E, Am/G, Dm7/C
+     * - Unicode symbols: C♯, D♭, C△7, C°, Cø
      */
     private static boolean isValidChord(String s) {
-        // Match chords like: C, Am, G7, F#m, Bb, Dm/A, Csus4, Cmaj7, C7sus4, Cadd9, etc.
-        return s.matches("^[A-G](#|b)?(m|maj|min|dim|aug|sus|add|M)?(\\d+)?(sus|add)?(\\d+)?(/[A-G](#|b)?)?$");
+        if (s == null || s.isEmpty()) return false;
+
+        // Remove parentheses for matching (e.g., m(maj7) -> mmaj7)
+        String normalized = s.replaceAll("[()]", "");
+
+        return normalized.matches(
+            "^[A-G][#b♯♭]?" +                                        // Root with accidental
+            "(m|min|mi|-|M|maj|Maj|△|Δ|dim|°|o|aug|\\+|ø|hdim)*" +   // Quality(ies)
+            "(\\d+)?" +                                               // Main interval
+            "(/\\d+)?" +                                              // Compound (6/9)
+            "(sus[24]?|add\\d+|[#b♯♭]\\d+|no\\d+|alt)*" +            // Modifications
+            "(/[A-G][#b♯♭]?)?" +                                     // Slash bass
+            "$"
+        );
     }
 
     /**

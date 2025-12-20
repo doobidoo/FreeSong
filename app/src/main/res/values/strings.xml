@@ -48,4 +48,43 @@
     <string name="clear">Clear</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+
+    <!-- Chord Help -->
+    <string name="chord_help_title">Akkord-Referenz</string>
+    <string name="chord_help_content">GRUNDAKKORDE
+  C, D, E, F, G, A, B
+  C#, Db, F#, Gb, etc.
+
+QUALITÄTEN
+  m, min    → Moll (Am, Dm)
+  maj, M, △ → Dur-Septim (Cmaj7)
+  dim, °    → Vermindert (Cdim)
+  aug, +    → Übermäßig (Caug)
+  ø, m7b5   → Halbvermindert
+
+MOLL-KOMBINATIONEN
+  m7        → Mollseptakkord (Am7)
+  mM7, m△7  → Moll mit Dur-7
+              (CmM7, Cm(maj7))
+  m7#5      → Moll-7 erhöht-5
+              (Cm7#5, Am7#5)
+  m7b5, ø   → Halbvermindert
+
+ERWEITERUNGEN
+  7, 9, 11, 13  → Septakkorde
+  sus2, sus4    → Suspended
+  add9, add11   → Hinzugefügt
+  6, 6/9        → Sext-Akkorde
+
+ALTERATIONEN
+  #5, b5   → Quinte alteriert
+  #9, b9   → None alteriert
+  #11, b13 → Weitere Alterationen
+  alt      → Alle Töne alteriert
+
+BASS-NOTEN
+  C/E, Am/G, G/B (Slash-Akkorde)
+
+POWER CHORDS
+  C5, G5, D5</string>
 </resources>

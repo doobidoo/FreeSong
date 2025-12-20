@@ -5,6 +5,50 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2025-12-20
+
+### Added
+- **Chord Move Toolbar**: Floating toolbar for moving inline chords in the editor
+  - Appears automatically when cursor is inside a chord `[Am]`
+  - Four buttons: Word left (◀◀), Char left (◀), Char right (▶), Word right (▶▶)
+  - Moves chord along the line without affecting lyrics
+  - Word-wise movement jumps to next/previous word boundary
+  - Chords can be moved to the end of the line
+  - Only available in inline chord mode (ChordPro format)
+  - Shows hint toast when trying to use in "Above" format mode
+
+### Technical
+- New chord_move_toolbar.xml layout for floating toolbar
+- PopupWindow-based toolbar that follows cursor position
+- Chord detection using bracket parsing `[` and `]`
+- Word boundary detection for smart movement
+- Position calculation works on "base text" (without chord) for accurate movement
+
+## [1.12.0] - 2025-12-20
+
+### Added
+- **Extended Chord Recognition**: Comprehensive support for all common chord notations
+  - Minor-Major: CmM7, CmMaj7, Cm(maj7), Cm△7
+  - Minor #5: Cm7#5, Am7#5, Em7#5
+  - Alterations: C7#5, C7b9, C7#9, C7alt, C7#5#9
+  - Half-diminished: Cø, Cø7, Cm7b5
+  - Unicode symbols: C♯, D♭, C△7, C°, Cø
+  - Complex combinations: Cmaj7#11, Am9sus4, F#m7b5/E
+- **Nashville Number System**: Live toggle between standard chords and Nashville notation
+  - Button "1-7" / "A-G" in song viewer
+  - Automatic key detection from song metadata
+  - Manual key selection dialog when key is unknown
+  - Converts all chords on-the-fly: Am → 6m, G7 → 5⁷ (in key C)
+- **Chord Reference**: Help button "?" in the song editor
+  - Shows all supported chord notations
+  - Includes minor combinations (m7#5, mMaj7)
+  - Lists alterations, extensions, and slash chords
+
+### Technical
+- New `NashvilleConverter.java` class for Nashville notation conversion
+- Updated chord regex in ChordFormatConverter and SongParser
+- Added Unicode accidental support (♯, ♭) in Transposer
+
 ## [1.11.0] - 2025-12-18
 
 ### Added

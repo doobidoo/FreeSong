@@ -41,6 +41,8 @@ public class SongViewActivity extends Activity {
     private float fontSize = 18f;
     private boolean speedBarVisible = true;
     private String pageTurnerMode = "scroll"; // "scroll" or "navigate"
+    private boolean nashvilleMode = false;
+    private String currentKey = null;
 
     // Setlist navigation support
     private ArrayList<String> setlistPaths;
@@ -61,6 +63,7 @@ public class SongViewActivity extends Activity {
     private ScrollView scrollView;
     private Button transposeUpBtn;
     private Button transposeDownBtn;
+    private Button nashvilleBtn;
     private Button autoScrollBtn;
     private Button editBtn;
     private Button fontUpBtn;
@@ -178,6 +181,14 @@ public class SongViewActivity extends Activity {
             @Override
             public void onClick(View v) {
                 transpose(-1);
+            }
+        });
+
+        nashvilleBtn = (Button) findViewById(R.id.nashvilleBtn);
+        nashvilleBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleNashvilleMode();
             }
         });
 
@@ -415,7 +426,13 @@ public class SongViewActivity extends Activity {
                             // Previous chord overlaps - add single space separator
                             chordLine.append(" ");
                         }
-                        chordLine.append(cp.getChord());
+
+                        // Apply Nashville conversion if enabled
+                        String displayChord = cp.getChord();
+                        if (nashvilleMode && currentKey != null) {
+                            displayChord = NashvilleConverter.toNashville(displayChord, currentKey);
+                        }
+                        chordLine.append(displayChord);
                     }
                     if (chordLine.length() > 0) {
                         int start = content.length();
@@ -806,5 +823,56 @@ public class SongViewActivity extends Activity {
             })
             .setNegativeButton("Abbrechen", null)
             .show();
+    }
+
+    private void toggleNashvilleMode() {
+        if (!nashvilleMode) {
+            // Turning on Nashville mode - need a key
+            currentKey = NashvilleConverter.detectKey(song);
+            if (currentKey == null || currentKey.isEmpty()) {
+                // No key in song metadata, ask user to select
+                showKeySelectionDialog();
+            } else {
+                // Key found, enable Nashville mode
+                nashvilleMode = true;
+                updateNashvilleButton();
+                displaySong();
+                Toast.makeText(this, "Nashville: Key " + currentKey, Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            // Turning off Nashville mode
+            nashvilleMode = false;
+            updateNashvilleButton();
+            displaySong();
+            Toast.makeText(this, "Standard-Akkorde", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showKeySelectionDialog() {
+        final String[] keys = NashvilleConverter.getCommonKeys();
+
+        new AlertDialog.Builder(this)
+            .setTitle("Tonart wählen")
+            .setItems(keys, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    currentKey = keys[which];
+                    nashvilleMode = true;
+                    updateNashvilleButton();
+                    displaySong();
+                    Toast.makeText(SongViewActivity.this,
+                        "Nashville: Key " + currentKey, Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("Abbrechen", null)
+            .show();
+    }
+
+    private void updateNashvilleButton() {
+        if (nashvilleMode) {
+            nashvilleBtn.setText("A-G");
+        } else {
+            nashvilleBtn.setText("1-7");
+        }
     }
 }

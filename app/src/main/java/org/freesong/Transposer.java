@@ -11,8 +11,8 @@ public class Transposer {
     private static final String[] NOTES_SHARP = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
     private static final String[] NOTES_FLAT = {"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"};
 
-    // Pattern to match chord root note (with optional sharp/flat)
-    private static final Pattern CHORD_ROOT_PATTERN = Pattern.compile("^([A-G][#b]?)(.*)$");
+    // Pattern to match chord root note (with optional sharp/flat, including Unicode symbols)
+    private static final Pattern CHORD_ROOT_PATTERN = Pattern.compile("^([A-G][#b♯♭]?)(.*)$");
 
     /**
      * Transpose a chord by a number of semitones.
@@ -52,17 +52,22 @@ public class Transposer {
             newIndex += 12;
         }
 
-        // Use sharps or flats based on original chord
-        String[] notes = root.contains("b") ? NOTES_FLAT : NOTES_SHARP;
+        // Use sharps or flats based on original chord (support both ASCII and Unicode)
+        boolean usesFlat = root.contains("b") || root.contains("♭");
+        String[] notes = usesFlat ? NOTES_FLAT : NOTES_SHARP;
         return notes[newIndex] + suffix;
     }
 
     /**
      * Get the semitone index of a note (0-11).
+     * Handles both ASCII (#, b) and Unicode (♯, ♭) accidentals.
      */
     private static int getNoteIndex(String note) {
+        // Normalize Unicode accidentals to ASCII for comparison
+        String normalized = note.replace("♯", "#").replace("♭", "b");
+
         for (int i = 0; i < NOTES_SHARP.length; i++) {
-            if (NOTES_SHARP[i].equalsIgnoreCase(note) || NOTES_FLAT[i].equalsIgnoreCase(note)) {
+            if (NOTES_SHARP[i].equalsIgnoreCase(normalized) || NOTES_FLAT[i].equalsIgnoreCase(normalized)) {
                 return i;
             }
         }
