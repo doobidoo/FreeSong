@@ -5,6 +5,13 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.1] - 2025-12-21
+
+### Fixed
+- **Key Change Detection**: Key changes are now correctly detected even when they appear after song content (sections, chords, lyrics)
+  - Previously, first key directive was always treated as base key
+  - Now properly recognizes mid-song key changes in songs without explicit base key
+
 ## [1.16.0] - 2025-12-21
 
 ### Added

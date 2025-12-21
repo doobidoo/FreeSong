@@ -137,6 +137,7 @@ public class SongParser {
         boolean firstLine = true;
         boolean secondLine = true;
         boolean hasBaseKey = false; // Track if we've set the initial key
+        boolean hasContent = false; // Track if we have any song content (sections/lines)
         Song.SongSection currentSection = new Song.SongSection();
         currentSection.setLabel("");
         String pendingChordLine = null; // For OnSong format: chord line above lyrics
@@ -166,12 +167,17 @@ public class SongParser {
                     currentSection.addLine(songLine);
                     pendingChordLine = null;
                 }
-                if (!hasBaseKey) {
-                    // First key directive - set as base key
+                // If we already have content, this is a key change, not the base key
+                if (!hasBaseKey && !hasContent) {
+                    // First key directive before any content - set as base key
                     song.setKey(newKey);
                     hasBaseKey = true;
                 } else {
-                    // Subsequent key - create key change line
+                    // Key after content exists - create key change line
+                    if (!hasBaseKey) {
+                        // No base key was set, but we have content - need to infer base key
+                        // The base key is unknown, so we can't transpose. Just show the key change.
+                    }
                     Song.SongLine keyChangeLine = new Song.SongLine();
                     keyChangeLine.setKeyChange(new Song.KeyChange(newKey));
                     currentSection.addLine(keyChangeLine);
@@ -191,12 +197,12 @@ public class SongParser {
 
                 // Handle key tag specially for key changes
                 if (tag.equals("key")) {
-                    if (!hasBaseKey) {
-                        // First key - set as base key
+                    if (!hasBaseKey && !hasContent) {
+                        // First key before any content - set as base key
                         song.setKey(value);
                         hasBaseKey = true;
                     } else {
-                        // Subsequent key - create key change line
+                        // Key after content exists - create key change line
                         // Flush pending chord line
                         if (pendingChordLine != null) {
                             Song.SongLine songLine = parseChordOnlyLine(pendingChordLine);
@@ -233,6 +239,7 @@ public class SongParser {
                     Song.SongLine songLine = parseChordOnlyLine(pendingChordLine);
                     currentSection.addLine(songLine);
                     pendingChordLine = null;
+                    hasContent = true;
                 }
                 // Save previous section if it has content
                 if (!currentSection.getLines().isEmpty()) {
@@ -243,6 +250,7 @@ public class SongParser {
                 String label = sectionMatcher.group(1);
                 String num = sectionMatcher.group(2);
                 currentSection.setLabel(label + (num != null && !num.isEmpty() ? " " + num : ""));
+                hasContent = true; // Section label counts as content
                 firstLine = false;
                 secondLine = false;
                 continue;
@@ -274,6 +282,7 @@ public class SongParser {
                 if (pendingChordLine != null) {
                     Song.SongLine songLine = parseChordOnlyLine(pendingChordLine);
                     currentSection.addLine(songLine);
+                    hasContent = true;
                 }
                 // Store this chord line to combine with next lyrics line
                 pendingChordLine = line; // Keep original spacing
@@ -291,6 +300,7 @@ public class SongParser {
                 Song.SongLine songLine = parseLine(trimmedLine);
                 currentSection.addLine(songLine);
             }
+            hasContent = true;
         }
 
         // Flush any remaining pending chord line

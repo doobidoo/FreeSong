@@ -1,7 +1,0 @@
-org.freesong.app-pngs-0 /home/hkr/repositories/FreeSong/app/build/generated/res/pngs/release
-org.freesong.app-resValues-1 /home/hkr/repositories/FreeSong/app/build/generated/res/resValues/release
-org.freesong.app-packageReleaseResources-2 /home/hkr/repositories/FreeSong/app/build/intermediates/incremental/release/packageReleaseResources/merged.dir
-org.freesong.app-packageReleaseResources-3 /home/hkr/repositories/FreeSong/app/build/intermediates/incremental/release/packageReleaseResources/stripped.dir
-org.freesong.app-merged_res-4 /home/hkr/repositories/FreeSong/app/build/intermediates/merged_res/release
-org.freesong.app-main-5 /home/hkr/repositories/FreeSong/app/src/main/res
-org.freesong.app-release-6 /home/hkr/repositories/FreeSong/app/src/release/res
