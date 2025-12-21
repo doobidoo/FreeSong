@@ -23,6 +23,8 @@ A free, open-source chord sheet and lyrics viewer for Android, designed as an al
 - **Chord Format Converter**: Toggle between inline chords `[G]lyrics` and chords-above-lyrics format while editing
 - **Flat/Sharp Converter**: Toggle between sharp (#) and flat (b) chord notation with intelligent enharmonic conversion
 - **Nashville Number System**: Toggle between standard chords and Nashville notation (1-7) in the song viewer
+- **Key Change Support**: Automatic transposition when key changes mid-song (`Key: D` or `{key: D}`)
+- **Standalone Bass Notation**: Support for bass movement notation (`/G`, `/Bb`, `/F#`) meaning "keep previous chord, move bass"
 - **Chord Reference**: Help button in editor showing all supported chord notations
 - **Chord Move Toolbar**: Floating toolbar to move chords character-by-character or word-by-word in the editor
 - **Delete from Editor**: Quick delete button in editor, or auto-delete when saving empty songs
@@ -114,6 +116,27 @@ This creates a compatible ZIP (version 2.0) that works on older Android devices.
 - Saving an empty song offers to delete it automatically
 - Press **Cancel** or back to discard changes
 
+### Key Changes
+FreeSong supports mid-song key changes for songs that modulate:
+- Add `Key: D` or `{key: D}` anywhere in your song to indicate a key change
+- The viewer shows a visual indicator: `── Key: D ──────────────`
+- All chords after the key change are automatically transposed
+- Works with both OnSong and ChordPro formats
+- Global transposition (+/-) also applies to key changes
+
+**Example:**
+```
+{key: C}
+
+[Verse 1]
+[C]Amazing [G]grace
+
+Key: D
+
+[Verse 2]
+[C]Amazing [G]grace  → displays as D, A
+```
+
 ### Nashville Number System
 Toggle Nashville notation in the song viewer with the "1-7" button:
 - Converts standard chords to Nashville numbers based on the song's key
@@ -127,6 +150,8 @@ Toggle Nashville notation in the song viewer with the "1-7" button:
 Tap the "?" button in the song editor to see all supported chord notations:
 - Basic: C, Am, G7, Dm7, Cmaj7
 - Extended: Cm7#5, CmMaj7, Cm(maj7), C7alt
+- Slash chords: C/E, Am/G, Dm7/C
+- Bass movement: /G, /Bb, /F# (keep previous chord, move bass)
 - Unicode: C♯, D♭, C△7, C°, Cø
 - And many more combinations
 
