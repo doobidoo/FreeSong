@@ -19,6 +19,8 @@ public class SongParser {
     private static final Pattern SECTION_LABEL = Pattern.compile("^(Verse|Chorus|Bridge|Pre-?Chorus|Intro|Outro|Tag|Interlude|Instrumental|Ending|Coda|Refrain|Strophe|Vamp)\\s*(\\d*):?\\s*$", Pattern.CASE_INSENSITIVE);
     // Pattern for standalone chord (e.g., C, Am, G7, F#m, Bb, Dm/A, Csus4)
     private static final Pattern SINGLE_CHORD = Pattern.compile("^[A-G](#|b)?(m|maj|min|dim|aug|sus|add)?(\\d+)?(/[A-G](#|b)?)?$");
+    // Pattern for key change line (OnSong format: "Key: D" or "Key: F#m")
+    private static final Pattern KEY_CHANGE_PATTERN = Pattern.compile("^Key:\\s*([A-G][#b♯♭]?m?)\\s*$", Pattern.CASE_INSENSITIVE);
 
     /**
      * Parse a song file.
@@ -134,6 +136,7 @@ public class SongParser {
         String[] lines = content.split("\n");
         boolean firstLine = true;
         boolean secondLine = true;
+        boolean hasBaseKey = false; // Track if we've set the initial key
         Song.SongSection currentSection = new Song.SongSection();
         currentSection.setLabel("");
         String pendingChordLine = null; // For OnSong format: chord line above lyrics
@@ -153,20 +156,72 @@ public class SongParser {
                 continue;
             }
 
+            // Check for OnSong-style key change: "Key: D"
+            Matcher keyChangeMatcher = KEY_CHANGE_PATTERN.matcher(trimmedLine);
+            if (keyChangeMatcher.matches()) {
+                String newKey = keyChangeMatcher.group(1);
+                // Flush pending chord line
+                if (pendingChordLine != null) {
+                    Song.SongLine songLine = parseChordOnlyLine(pendingChordLine);
+                    currentSection.addLine(songLine);
+                    pendingChordLine = null;
+                }
+                if (!hasBaseKey) {
+                    // First key directive - set as base key
+                    song.setKey(newKey);
+                    hasBaseKey = true;
+                } else {
+                    // Subsequent key - create key change line
+                    Song.SongLine keyChangeLine = new Song.SongLine();
+                    keyChangeLine.setKeyChange(new Song.KeyChange(newKey));
+                    currentSection.addLine(keyChangeLine);
+                }
+                firstLine = false;
+                secondLine = false;
+                continue;
+            }
+
             // Check for ChordPro tags {tag: value}
             Matcher tagMatcher = CHORDPRO_TAG.matcher(trimmedLine);
             if (tagMatcher.find()) {
                 String tag = tagMatcher.group(1).toLowerCase();
                 String value = tagMatcher.group(2);
                 if (value == null) value = "";
+                value = value.trim();
 
-                processTag(song, tag, value.trim());
+                // Handle key tag specially for key changes
+                if (tag.equals("key")) {
+                    if (!hasBaseKey) {
+                        // First key - set as base key
+                        song.setKey(value);
+                        hasBaseKey = true;
+                    } else {
+                        // Subsequent key - create key change line
+                        // Flush pending chord line
+                        if (pendingChordLine != null) {
+                            Song.SongLine songLine = parseChordOnlyLine(pendingChordLine);
+                            currentSection.addLine(songLine);
+                            pendingChordLine = null;
+                        }
+                        Song.SongLine keyChangeLine = new Song.SongLine();
+                        keyChangeLine.setKeyChange(new Song.KeyChange(value));
+                        currentSection.addLine(keyChangeLine);
+                    }
+                    // If the whole line is just this tag, skip to next line
+                    if (tagMatcher.start() == 0 && tagMatcher.end() == trimmedLine.length()) {
+                        firstLine = false;
+                        secondLine = false;
+                        continue;
+                    }
+                } else {
+                    processTag(song, tag, value);
 
-                // If the whole line is just a tag, skip to next line
-                if (tagMatcher.start() == 0 && tagMatcher.end() == trimmedLine.length()) {
-                    firstLine = false;
-                    secondLine = false;
-                    continue;
+                    // If the whole line is just a tag, skip to next line
+                    if (tagMatcher.start() == 0 && tagMatcher.end() == trimmedLine.length()) {
+                        firstLine = false;
+                        secondLine = false;
+                        continue;
+                    }
                 }
             }
 

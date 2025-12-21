@@ -398,6 +398,10 @@ public class SongViewActivity extends Activity {
 
         SpannableStringBuilder content = new SpannableStringBuilder();
 
+        // Track key changes for automatic transposition
+        String baseKey = song.getKey();
+        int keyChangeTransposition = 0; // Semitones to transpose due to key changes
+
         for (Song.SongSection section : song.getSections()) {
             // Section label
             if (!section.getLabel().isEmpty()) {
@@ -410,6 +414,34 @@ public class SongViewActivity extends Activity {
             }
 
             for (Song.SongLine line : section.getLines()) {
+                // Check for key change line
+                if (line.isKeyChange()) {
+                    String newKey = line.getKeyChange().getNewKey();
+
+                    // Calculate transposition from base key to new key
+                    if (baseKey != null && !baseKey.isEmpty()) {
+                        keyChangeTransposition = Transposer.getSemitonesBetween(baseKey, newKey);
+                    }
+
+                    // Apply global transposition to the displayed key
+                    String displayKey = newKey;
+                    if (transposition != 0) {
+                        displayKey = Transposer.transposeChord(newKey, transposition);
+                    }
+
+                    // Display key change line with styling
+                    int start = content.length();
+                    content.append("── Key: ").append(displayKey).append(" ──────────────\n");
+                    content.setSpan(new ForegroundColorSpan(sectionColor), start, content.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    content.setSpan(new StyleSpan(Typeface.BOLD), start, content.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                    // Update currentKey for Nashville mode
+                    currentKey = displayKey;
+                    continue;
+                }
+
                 // Build chord line
                 if (!line.getChords().isEmpty()) {
                     StringBuilder chordLine = new StringBuilder();
@@ -427,8 +459,13 @@ public class SongViewActivity extends Activity {
                             chordLine.append(" ");
                         }
 
-                        // Apply Nashville conversion if enabled
+                        // Apply key change transposition
                         String displayChord = cp.getChord();
+                        if (keyChangeTransposition != 0) {
+                            displayChord = Transposer.transposeChord(displayChord, keyChangeTransposition);
+                        }
+
+                        // Apply Nashville conversion if enabled
                         if (nashvilleMode && currentKey != null) {
                             displayChord = NashvilleConverter.toNashville(displayChord, currentKey);
                         }

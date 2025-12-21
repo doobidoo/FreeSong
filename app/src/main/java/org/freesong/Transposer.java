@@ -102,4 +102,51 @@ public class Transposer {
         if (semitones > 0) return "+" + semitones;
         return String.valueOf(semitones);
     }
+
+    /**
+     * Calculate the number of semitones between two keys.
+     * Used for key change transposition.
+     * @param fromKey The original key (e.g., "C", "Am", "F#")
+     * @param toKey The target key (e.g., "D", "Bm", "G#")
+     * @return Number of semitones to transpose (0-11), or 0 if keys are invalid
+     */
+    public static int getSemitonesBetween(String fromKey, String toKey) {
+        if (fromKey == null || toKey == null || fromKey.isEmpty() || toKey.isEmpty()) {
+            return 0;
+        }
+
+        int fromIndex = getKeyNoteIndex(fromKey);
+        int toIndex = getKeyNoteIndex(toKey);
+
+        if (fromIndex == -1 || toIndex == -1) {
+            return 0;
+        }
+
+        int diff = toIndex - fromIndex;
+        if (diff < 0) {
+            diff += 12;
+        }
+        return diff;
+    }
+
+    /**
+     * Get the semitone index of a key's root note.
+     * Extracts the root note from keys like "C", "Am", "F#m", "Bbmaj7".
+     */
+    private static int getKeyNoteIndex(String key) {
+        if (key == null || key.isEmpty()) {
+            return -1;
+        }
+
+        // Extract just the root note (first letter + optional accidental)
+        String root;
+        if (key.length() >= 2 && (key.charAt(1) == '#' || key.charAt(1) == 'b' ||
+                                   key.charAt(1) == '♯' || key.charAt(1) == '♭')) {
+            root = key.substring(0, 2);
+        } else {
+            root = key.substring(0, 1);
+        }
+
+        return getNoteIndex(root);
+    }
 }

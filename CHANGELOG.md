@@ -5,6 +5,16 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.0] - 2025-12-21
+
+### Added
+- **Key Change Support**: Automatic transposition when key changes mid-song
+  - Supports `Key: D` (OnSong) and `{key: D}` (ChordPro) notation
+  - Visual key change indicator: `── Key: D ──────────────`
+  - Chords after key change are automatically transposed
+  - Global transposition (+/-) also applies to key changes
+  - Nashville mode works correctly with key changes
+
 ## [1.15.0] - 2025-12-20
 
 ### Added

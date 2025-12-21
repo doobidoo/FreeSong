@@ -60,12 +60,31 @@ public class Song {
     public static class SongLine {
         private String lyrics = "";
         private List<ChordPosition> chords = new ArrayList<ChordPosition>();
+        private KeyChange keyChange = null;
 
         public String getLyrics() { return lyrics; }
         public void setLyrics(String lyrics) { this.lyrics = lyrics; }
 
         public List<ChordPosition> getChords() { return chords; }
         public void addChord(ChordPosition chord) { chords.add(chord); }
+
+        public boolean isKeyChange() { return keyChange != null; }
+        public KeyChange getKeyChange() { return keyChange; }
+        public void setKeyChange(KeyChange keyChange) { this.keyChange = keyChange; }
+    }
+
+    /**
+     * Represents a key change within a song.
+     * Used to transpose subsequent chords to a new key.
+     */
+    public static class KeyChange {
+        private String newKey;
+
+        public KeyChange(String newKey) {
+            this.newKey = newKey;
+        }
+
+        public String getNewKey() { return newKey; }
     }
 
     /**
