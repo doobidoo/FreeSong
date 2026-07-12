@@ -5,6 +5,27 @@ All notable changes to FreeSong will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.17.0] - 2026-07-12
+
+### Added
+- **Chord Layout Overhaul**: Geometric chord-over-syllable alignment at any font size
+  - Chords now sit exactly above their syllable and stay attached on line wrap
+  - New `ChordSegmenter` (FreeSongCore) splits lyric lines into chord+text segments
+  - New `FlowLayoutSolver` (FreeSongCore) provides pure greedy row-packing math
+  - New `FlowLayout` SwiftUI wrapper (FreeSongApp) for wrapping chord columns
+
+- **Per-Song Transpose Persistence**: Transpose offset now persists per song across setlist navigation
+  - Previously transposing +2 then swiping to next/previous song reset to 0
+  - Now each song remembers its transpose offset keyed by `sourcePath` or `title`
+  - Header "Key:" label shows the transposed key while transposed
+
+### Fixed
+- **Chord Left-Drift Bug**: Eliminated progressive chord misalignment at larger font sizes
+  - Root cause: old space-padding scheme with 0.75x chord-row font drifted with column width
+  - New segment-based flow layout removes font-size dependency
+
+- **iOS Build Fixes**: macOS compatibility for SwiftUI views using iOS-only APIs
+
 ## [1.16.1] - 2025-12-21
 
 ### Fixed
