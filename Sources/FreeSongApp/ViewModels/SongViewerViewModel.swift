@@ -23,9 +23,9 @@ final class SongViewerViewModel: ObservableObject {
     private let originalSong: Song
     private var autoScrollTask: Task<Void, Never>?
 
-    init(song: Song) {
+    init(song: Song, initialTranspose: Int? = nil) {
         self.originalSong = song
-        self.transposeOffset = song.transpose
+        self.transposeOffset = initialTranspose ?? song.transpose
         // Seed the spelling preference from the song's own chords (Android's
         // toggleAccidentals auto-detects the current style the same way), so
         // opening a song never respells it until the user toggles.

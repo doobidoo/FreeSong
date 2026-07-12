@@ -18,6 +18,7 @@ struct SongViewer: View {
     @State private var currentSong: Song?
     @State private var reloadCount = 0
     @State private var index: Int
+    @State private var transposeBySong: [String: Int] = [:]
 
     init(song: Song, songs: [Song] = [], startIndex: Int = 0) {
         self.song = song
@@ -34,6 +35,8 @@ struct SongViewer: View {
         return song
     }
 
+    private func key(for song: Song) -> String { song.sourcePath ?? song.title }
+
     private func navigate(by direction: Int) {
         let newIndex = index + direction
         guard songs.indices.contains(newIndex) else { return }
@@ -47,9 +50,13 @@ struct SongViewer: View {
             song: activeSong,
             position: hasNavigation ? (index + 1, songs.count) : nil,
             onNavigate: hasNavigation ? navigate : nil,
+            initialTranspose: transposeBySong[key(for: activeSong)] ?? activeSong.transpose,
             onSaved: { updated in
                 currentSong = updated
                 reloadCount += 1
+            },
+            onTransposeChanged: { offset in
+                transposeBySong[key(for: activeSong)] = offset
             }
         )
         // simultaneousGesture + horizontal-dominance check so the swipe never
@@ -73,6 +80,7 @@ private struct SongViewerContent: View {
     var position: (index: Int, total: Int)?
     var onNavigate: ((Int) -> Void)?
     let onSaved: (Song) -> Void
+    let onTransposeChanged: (Int) -> Void
     @StateObject private var viewModel: SongViewerViewModel
     @State private var showEditor = false
     @State private var showChordReference = false
@@ -83,13 +91,17 @@ private struct SongViewerContent: View {
         song: Song,
         position: (index: Int, total: Int)? = nil,
         onNavigate: ((Int) -> Void)? = nil,
-        onSaved: @escaping (Song) -> Void
+        initialTranspose: Int = 0,
+        onSaved: @escaping (Song) -> Void,
+        onTransposeChanged: @escaping (Int) -> Void
     ) {
         self.song = song
         self.position = position
         self.onNavigate = onNavigate
         self.onSaved = onSaved
-        _viewModel = StateObject(wrappedValue: SongViewerViewModel(song: song))
+        self.onTransposeChanged = onTransposeChanged
+        _viewModel = StateObject(
+            wrappedValue: SongViewerViewModel(song: song, initialTranspose: initialTranspose))
     }
 
     private func reloadSong() {
@@ -119,6 +131,9 @@ private struct SongViewerContent: View {
                         proxy.scrollTo(id, anchor: .top)
                     }
                 }
+            }
+            .onChange(of: viewModel.transposeOffset) { newValue in
+                onTransposeChanged(newValue)
             }
         }
         .navigationTitle(position.map { "\($0.index) / \($0.total)" } ?? song.title)
@@ -286,7 +301,7 @@ private struct SongViewerContent: View {
                     .foregroundStyle(.secondary)
             }
 
-            if let key = song.key {
+            if let key = viewModel.transposedSong.key, !key.isEmpty {
                 Text("Key: \(key)")
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.accent)
