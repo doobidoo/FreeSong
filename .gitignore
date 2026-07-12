@@ -1,0 +1,22 @@
+# XcodeGen generated project
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+
+# Swift Package Manager
+.build/
+Package.resolved
+
+# Xcode
+.DS_Store
+*.xcuserdata
+*.xcuserstate
+DerivedData/
+
+# Gradle
+.gradle/
+build/
+
+# Tooling
+.claude/
+.vscode/
