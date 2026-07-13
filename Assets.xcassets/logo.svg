@@ -1,0 +1,42 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FBBF24" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FBBF24" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- iOS-style rounded rect background -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bgGrad)"/>
+
+  <!-- Subtle glow accent at top -->
+  <ellipse cx="512" cy="200" rx="300" ry="180" fill="url(#glowGrad)"/>
+
+  <!-- Music Note Symbol -->
+  <g fill="white">
+    <!-- Note head -->
+    <ellipse cx="420" cy="620" rx="100" ry="72" transform="rotate(-15, 420, 620)"/>
+
+    <!-- Stem -->
+    <rect x="495" y="220" width="20" height="420" rx="10"/>
+
+    <!-- Flag - flowing curve -->
+    <path d="M 515 220 
+             Q 640 260 610 400 
+             Q 590 480 540 520 
+             L 560 440 
+             Q 610 380 590 300 
+             Q 570 240 515 220 Z"/>
+  </g>
+
+  <!-- Decorative dot (second note suggestion) -->
+  <g fill="white" opacity="0.35">
+    <ellipse cx="320" cy="680" rx="55" ry="40" transform="rotate(-15, 320, 680)"/>
+    <rect x="365" y="420" width="14" height="280" rx="7"/>
+  </g>
+</svg>

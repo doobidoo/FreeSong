@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23000" systemVersion="24E248" minimumToolsVersion="15.0" macOSMinimumToolsVersion="15.0" iOSMinimumToolsVersion="15.0" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="SetList" representedClassName="SetList" syncable="YES">
+        <attribute name="id" attributeType="UUID" optional="NO" syncable="YES"/>
+        <attribute name="name" attributeType="String" optional="NO" syncable="YES"/>
+        <attribute name="createdAt" attributeType="Date" optional="NO" syncable="YES"/>
+        <attribute name="modifiedAt" attributeType="Date" optional="NO" syncable="YES"/>
+        <relationship name="items" toMany="YES" destinationEntity="SetListItem" inverseName="setList" inverseEntity="SetListItem" minCount="0" maxCount="0" deletionRule="Cascade" syncable="YES" ordered="YES"/>
+    </entity>
+    <entity name="SetListItem" representedClassName="SetListItem" syncable="YES">
+        <attribute name="id" attributeType="UUID" optional="NO" syncable="YES"/>
+        <attribute name="songPath" attributeType="String" optional="NO" syncable="YES"/>
+        <attribute name="songTitle" attributeType="String" optional="NO" syncable="YES"/>
+        <attribute name="songArtist" attributeType="String" optional="YES" syncable="YES"/>
+        <attribute name="position" attributeType="Integer 16" optional="NO" syncable="YES"/>
+        <attribute name="notes" attributeType="String" optional="YES" syncable="YES"/>
+        <relationship name="setList" destinationEntity="SetList" inverseName="items" inverseEntity="SetList" minCount="1" maxCount="1" deletionRule="Nullify" syncable="YES"/>
+    </entity>
+</model>

@@ -1,0 +1,48 @@
+name: FreeSong
+options:
+  bundleIdPrefix: com.freesong
+  deploymentTarget:
+    iOS: "16.0"
+  localPackagesGroup: ""
+  xcodeVersion: "16.0"
+
+packages:
+  FreeSong:
+    path: .
+
+settings:
+  SWIFT_VERSION: "5.9"
+
+targets:
+  FreeSongiOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: XcodeGen/FreeSongiOS
+      - path: Assets.xcassets
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.freesong.app
+      INFOPLIST_FILE: XcodeGen/FreeSongiOS/Info.plist
+      PRODUCT_NAME: FreeSong
+      PRODUCT_MODULE_NAME: FreeSongiOS
+      DEVELOPMENT_TEAM: "D22LY39S75"
+      OTHER_SWIFT_FLAGS: "-parse-as-library"
+    info:
+      path: XcodeGen/FreeSongiOS/Info.plist
+      properties:
+        LSRequiresIPhoneOS: true
+        UIRequiresFullScreen: false
+        NSBluetoothAlwaysUsageDescription: "FreeSong uses Bluetooth to connect to wireless page turner pedals while viewing songs."
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    dependencies:
+      - package: FreeSong
+        products:
+          - FreeSongApp
+          - FreeSongCore
+          - FreeSongStorage
+          - FreeSongImport
+          - FreeSongSync
