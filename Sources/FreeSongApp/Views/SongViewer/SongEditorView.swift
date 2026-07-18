@@ -64,7 +64,7 @@ struct SongEditorView: View {
     @ViewBuilder
     private var editor: some View {
         #if os(iOS)
-        ChordTextEditor(
+        ChordTextEditorWrapper(
             text: $vm.editedContent,
             selection: $vm.selectedRange,
             fontSize: CGFloat(fontSize),
@@ -211,90 +211,4 @@ struct SongEditorView: View {
     }
 }
 
-// MARK: - UITextView wrapper (cursor tracking; iOS 16 has no TextEditor selection API)
-
-#if os(iOS)
-private struct ChordTextEditor: UIViewRepresentable {
-    @Binding var text: String
-    @Binding var selection: NSRange
-    var fontSize: CGFloat
-    /// Caret rect in the representable's visible coordinate space (`.null` when unknown).
-    @Binding var caretRect: CGRect
-
-    func makeUIView(context: Context) -> UITextView {
-        let tv = UITextView()
-        tv.delegate = context.coordinator
-        tv.font = .monospacedSystemFont(ofSize: fontSize, weight: .regular)
-        tv.autocorrectionType = .no
-        tv.autocapitalizationType = .none
-        tv.smartQuotesType = .no
-        tv.smartDashesType = .no
-        tv.backgroundColor = .clear
-        tv.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-        tv.text = text
-        return tv
-    }
-
-    func updateUIView(_ tv: UITextView, context: Context) {
-        context.coordinator.parent = self
-        context.coordinator.isProgrammatic = true
-        defer { context.coordinator.isProgrammatic = false }
-
-        if tv.text != text { tv.text = text }
-        if tv.font?.pointSize != fontSize {
-            tv.font = .monospacedSystemFont(ofSize: fontSize, weight: .regular)
-        }
-        let len = (tv.text as NSString).length
-        if selection.location <= len, tv.selectedRange != selection {
-            tv.selectedRange = selection
-            tv.scrollRangeToVisible(selection)
-        }
-        context.coordinator.publishCaret(tv)
-    }
-
-    func makeCoordinator() -> Coordinator { Coordinator(self) }
-
-    final class Coordinator: NSObject, UITextViewDelegate {
-        var parent: ChordTextEditor
-        var isProgrammatic = false
-        init(_ parent: ChordTextEditor) { self.parent = parent }
-
-        func textViewDidChange(_ tv: UITextView) {
-            parent.text = tv.text
-            parent.selection = tv.selectedRange
-            publishCaret(tv)
-        }
-
-        func textViewDidChangeSelection(_ tv: UITextView) {
-            publishCaret(tv)
-            guard !isProgrammatic else { return }
-            if parent.selection != tv.selectedRange {
-                parent.selection = tv.selectedRange
-            }
-        }
-
-        /// The caret scrolls with the content; keep the published rect in sync.
-        func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            if let tv = scrollView as? UITextView { publishCaret(tv) }
-        }
-
-        /// Publish the caret rect converted from content coordinates (which scroll)
-        /// to the visible coordinate space the SwiftUI overlay lives in. Async so we
-        /// never mutate SwiftUI state from inside a view update.
-        func publishCaret(_ tv: UITextView) {
-            var rect = CGRect.null
-            if let start = tv.selectedTextRange?.start {
-                let r = tv.caretRect(for: start)
-                if !r.isNull, !r.isInfinite, !r.origin.x.isNaN, !r.origin.y.isNaN {
-                    rect = r.offsetBy(dx: -tv.contentOffset.x, dy: -tv.contentOffset.y)
-                }
-            }
-            let newRect = rect
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                if self.parent.caretRect != newRect { self.parent.caretRect = newRect }
-            }
-        }
-    }
-}
-#endif
+// MARK: - ChordTextEditorWrapper is defined in ChordTextEditor.swift
