@@ -244,15 +244,46 @@ struct ChordTextEditorWrapper: UIViewRepresentable {
             let lineRange = NSRange(location: state.chordInfo.lineStart, length: state.chordInfo.lineEnd - state.chordInfo.lineStart)
             var lineText = ns.substring(with: lineRange)
 
-            // Remove old chord from line text
-            let oldChordRangeInLine = NSRange(location: state.chordInfo.range.location - state.chordInfo.lineStart, length: state.chordInfo.range.length)
-            lineText = (lineText as NSString).replacingCharacters(in: oldChordRangeInLine, with: "")
+            // Find and remove the chord (search by name since position may have shifted from previous moves)
+            let open = "[", close = "]"
+            let lineNs = lineText as NSString
+            var foundRange: NSRange?
+            var searchIdx = 0
+            while searchIdx < lineNs.length {
+                if lineNs.character(at: searchIdx) == UInt16(open.utf16.first!) {
+                    var j = searchIdx + 1
+                    var closeIdx = -1
+                    let newline = UInt16("\n".utf16.first!)
+                    while j < lineNs.length {
+                        let c = lineNs.character(at: j)
+                        if c == UInt16(close.utf16.first!) { closeIdx = j; break }
+                        if c == newline { break }
+                        j += 1
+                    }
+                    if closeIdx >= 0 {
+                        let chordName = lineNs.substring(with: NSRange(location: searchIdx + 1, length: closeIdx - searchIdx - 1))
+                        if chordName == state.chordInfo.name {
+                            foundRange = NSRange(location: searchIdx, length: closeIdx - searchIdx + 1)
+                            break
+                        }
+                        searchIdx = closeIdx + 1
+                        continue
+                    }
+                }
+                searchIdx += 1
+            }
+
+            if let rangeToRemove = foundRange {
+                lineText = (lineText as NSString).replacingCharacters(in: rangeToRemove, with: "")
+            }
 
             // Calculate new insert position based on horizontal drag distance
             let dragDeltaX = state.currentLocation.x - state.initialLocation.x
             let charWidth = state.fontSize * 0.6
             let charDelta = Int(round(dragDeltaX / charWidth))
-            var insertLoc = max(0, min((lineText as NSString).length, oldChordRangeInLine.location + charDelta))
+            // Base insert location is original chord position in line
+            let originalChordPosInLine = state.chordInfo.range.location - state.chordInfo.lineStart
+            var insertLoc = max(0, min((lineText as NSString).length, originalChordPosInLine + charDelta))
 
             // Insert chord at new position
             let insertText = "[\(state.chordInfo.name)]"
