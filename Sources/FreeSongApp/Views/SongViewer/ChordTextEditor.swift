@@ -113,6 +113,10 @@ struct ChordTextEditorWrapper: UIViewRepresentable {
         func textViewDidChange(_ textView: UITextView) {
             parent.text = textView.text ?? ""
             parent.selection = textView.selectedRange
+            // Restore chord highlighting after gesture
+            if let chordTextView = textView as? ChordTextView {
+                chordTextView.attributedText = parent.highlightChords(in: textView.text ?? "", fontSize: parent.fontSize)
+            }
             publishCaret(textView)
         }
 
@@ -386,9 +390,36 @@ struct ChordInfo {
 // MARK: - Custom UITextView for drag interaction
 
 class ChordTextView: UITextView {
+    /// Currently tapped chord range (for visual feedback)
+    var tappedChordRange: NSRange? {
+        didSet { setNeedsDisplay() }
+    }
+    
     override func touchesShouldBegin(_ touches: Set<UITouch>, with event: UIEvent?, in view: UIView) -> Bool {
         super.touchesShouldBegin(touches, with: event, in: view)
         return true
+    }
+    
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+        // Draw highlight for tapped chord
+        if let range = tappedChordRange {
+            let layoutManager = self.layoutManager
+            let glyphRange = layoutManager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+            let rects = (0..<layoutManager.numberOfGlyphs).compactMap { glyphIndex -> CGRect? in
+                guard NSLocationInRange(glyphIndex, glyphRange) else { return nil }
+                var glyphRect = layoutManager.boundingRect(forGlyphRange: NSRange(location: glyphIndex, length: 1), in: textContainer)
+                glyphRect.origin.x += textContainerInset.left
+                glyphRect.origin.y += textContainerInset.top - contentOffset.y
+                return glyphRect
+            }
+            let highlightColor = UIColor.systemBlue.withAlphaComponent(0.3)
+            let context = UIGraphicsGetCurrentContext()
+            context?.setFillColor(highlightColor.cgColor)
+            for r in rects {
+                context?.fill(r.insetBy(dx: -2, dy: -1))
+            }
+        }
     }
 }
 
@@ -396,12 +427,21 @@ class ChordTextView: UITextView {
 
 class ChordDragGestureRecognizer: UIGestureRecognizer {
     var initialTouchLocation: CGPoint = .zero
-    var minimumDragDistance: CGFloat = 10
+    var minimumDragDistance: CGFloat = 5
+    var touchBeganChordRange: NSRange?
+    weak var textView: ChordTextView?
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
-        guard let touch = touches.first, let view = view else { return }
+        guard let touch = touches.first, let view = view as? ChordTextView else { return }
+        textView = view
         initialTouchLocation = touch.location(in: view)
         state = .possible
+        
+        // Immediately highlight the chord under finger
+        if let chordInfo = findChordAt(point: initialTouchLocation, in: view) {
+            touchBeganChordRange = chordInfo.range
+            highlightChord(range: chordInfo.range, in: view)
+        }
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
@@ -415,12 +455,97 @@ class ChordDragGestureRecognizer: UIGestureRecognizer {
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+        clearHighlight()
         if state == .began || state == .changed { state = .ended }
         else { state = .cancelled }
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+        clearHighlight()
         state = .cancelled
+    }
+    
+    private func findChordAt(point: CGPoint, in textView: ChordTextView) -> ChordInfo? {
+        let textPos = textView.closestPosition(to: point)
+        guard let pos = textPos else { return nil }
+        
+        let offset = textView.offset(from: textView.beginningOfDocument, to: pos)
+        let ns = (textView.text ?? "") as NSString
+        
+        let open = UInt16("[".utf16.first!)
+        let close = UInt16("]".utf16.first!)
+        let newline = UInt16("\n".utf16.first!)
+        var i = 0
+        var occurrence = 0
+        var lineOccurrence = 0
+        var currentLineStart = 0
+        let len = ns.length
+        
+        while i < len {
+            if ns.character(at: i) == newline {
+                currentLineStart = i + 1
+                lineOccurrence = 0
+            }
+            if ns.character(at: i) == open {
+                var j = i + 1
+                var closeIdx = -1
+                while j < len {
+                    let c = ns.character(at: j)
+                    if c == close { closeIdx = j; break }
+                    if c == newline { break }
+                    j += 1
+                }
+                if closeIdx >= 0 {
+                    if offset >= i && offset <= closeIdx + 1 {
+                        let chordText = ns.substring(with: NSRange(location: i + 1, length: closeIdx - i - 1))
+                        return ChordInfo(
+                            occurrence: occurrence,
+                            lineOccurrence: lineOccurrence,
+                            range: NSRange(location: i, length: closeIdx - i + 1),
+                            name: chordText,
+                            lineStart: lineStartOffset(at: i, in: ns),
+                            lineEnd: lineEndOffset(at: closeIdx, in: ns)
+                        )
+                    }
+                    occurrence += 1
+                    lineOccurrence += 1
+                    i = closeIdx + 1
+                    continue
+                }
+            }
+            i += 1
+        }
+        return nil
+    }
+    
+    private func lineStartOffset(at offset: Int, in ns: NSString) -> Int {
+        var i = offset
+        let newline = UInt16("\n".utf16.first!)
+        while i > 0 && ns.character(at: i - 1) != newline { i -= 1 }
+        return i
+    }
+    
+    private func lineEndOffset(at offset: Int, in ns: NSString) -> Int {
+        var i = offset
+        let newline = UInt16("\n".utf16.first!)
+        while i < ns.length && ns.character(at: i) != newline { i += 1 }
+        return i
+    }
+    
+    private func highlightChord(range: NSRange, in textView: ChordTextView) {
+        let attr = textView.attributedText.mutableCopy() as! NSMutableAttributedString
+        let highlightAttrs: [NSAttributedString.Key: Any] = [
+            .backgroundColor: UIColor.systemBlue.withAlphaComponent(0.4),
+            .foregroundColor: UIColor.white,
+            .font: UIFont.monospacedSystemFont(ofSize: textView.font!.pointSize, weight: .bold)
+        ]
+        attr.addAttributes(highlightAttrs, range: range)
+        textView.attributedText = attr
+    }
+    
+    private func clearHighlight() {
+        touchBeganChordRange = nil
+        // The coordinator's textViewDidChange will restore proper highlighting
     }
 }
 
