@@ -192,8 +192,14 @@ struct ChordTextEditorWrapper: UIViewRepresentable {
             let newline = UInt16("\n".utf16.first!)
             var i = 0
             var occurrence = 0
+            var lineOccurrence = 0
+            var currentLineStart = 0
             let len = ns.length
             while i < len {
+                if ns.character(at: i) == newline {
+                    currentLineStart = i + 1
+                    lineOccurrence = 0
+                }
                 if ns.character(at: i) == open {
                     var j = i + 1
                     var closeIdx = -1
@@ -208,6 +214,7 @@ struct ChordTextEditorWrapper: UIViewRepresentable {
                             let chordText = ns.substring(with: NSRange(location: i + 1, length: closeIdx - i - 1))
                             return ChordInfo(
                                 occurrence: occurrence,
+                                lineOccurrence: lineOccurrence,
                                 range: NSRange(location: i, length: closeIdx - i + 1),
                                 name: chordText,
                                 lineStart: lineStartOffset(at: i, in: ns),
@@ -215,6 +222,7 @@ struct ChordTextEditorWrapper: UIViewRepresentable {
                             )
                         }
                         occurrence += 1
+                        lineOccurrence += 1
                         i = closeIdx + 1
                         continue
                     }
@@ -244,11 +252,12 @@ struct ChordTextEditorWrapper: UIViewRepresentable {
             let lineRange = NSRange(location: state.chordInfo.lineStart, length: state.chordInfo.lineEnd - state.chordInfo.lineStart)
             var lineText = ns.substring(with: lineRange)
 
-            // Find and remove the chord (search by name since position may have shifted from previous moves)
+            // Find and remove the chord by both name AND lineOccurrence (to handle duplicate chord names in same line)
             let open = "[", close = "]"
             let lineNs = lineText as NSString
             var foundRange: NSRange?
             var searchIdx = 0
+            var lineChordIndex = 0
             while searchIdx < lineNs.length {
                 if lineNs.character(at: searchIdx) == UInt16(open.utf16.first!) {
                     var j = searchIdx + 1
@@ -262,10 +271,11 @@ struct ChordTextEditorWrapper: UIViewRepresentable {
                     }
                     if closeIdx >= 0 {
                         let chordName = lineNs.substring(with: NSRange(location: searchIdx + 1, length: closeIdx - searchIdx - 1))
-                        if chordName == state.chordInfo.name {
+                        if chordName == state.chordInfo.name && lineChordIndex == state.chordInfo.lineOccurrence {
                             foundRange = NSRange(location: searchIdx, length: closeIdx - searchIdx + 1)
                             break
                         }
+                        lineChordIndex += 1
                         searchIdx = closeIdx + 1
                         continue
                     }
@@ -366,6 +376,7 @@ struct DragState {
 
 struct ChordInfo {
     let occurrence: Int
+    let lineOccurrence: Int  // 0-based index of this chord within its line
     let range: NSRange
     let name: String
     let lineStart: Int
